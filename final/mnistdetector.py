@@ -1,12 +1,15 @@
 import pygame
+import math
+import numpy as np
+import random
 import timemodule
 from neurongraphics import NeuronG
-import math
-import random
+from mnist_loader import *
 
 pygame.init()
 
-size = (855,855)
+nsize = 855
+size = (nsize,nsize)
 screen = pygame.display.set_mode(size)
 
 gclock = pygame.time.Clock()
@@ -19,11 +22,23 @@ dt = 0.01
 
 nclock = timemodule.Clock(dt)
 
+allimages = get_numpy_array()
+imgindex = 0
+currimg = allimages[imgindex]
+print(currimg)
+
 neurongrid = []
+'''
 scale = 0.55
 spacing = 45 * scale
 neuroncols = int(float(size[0])/spacing)
 neuronrows = int(float(size[1])/spacing)
+'''
+nneurons = 28
+neuroncols = nneurons
+neuronrows = nneurons
+spacing = 42
+scale = int(float(nsize)/nneurons)
 
 for i in range(1, neuronrows):
 	row = []
@@ -141,14 +156,16 @@ while not done:
 			if event.key == pygame.K_SPACE:
 				draw = (draw+1)%4
 			if event.key == pygame.K_LEFT:
-				currline -= 1
+				imgindex -= 1
 			if event.key == pygame.K_RIGHT:
-				currline += 1
+				imgindex += 1
 		
 	if currline < 0:
-		currline = 0
-	if currline > neuroncols-2:
-		currline = neuroncols-2
+		imgindex = 0
+	if imgindex > neuroncols-1:
+		imgindex = neuroncols-1
+	
+	currimg = allimages[imgindex]
 				
 	
 	screen.fill(BLACK)
@@ -171,9 +188,9 @@ while not done:
 		draw_grid_synapses(receptivefield)
 		draw_grid_neurons(receptivefield)
 			
-	for i in range(0, neuronrows-1):
-		for j in range(0, neuroncols-1):
-			neurongrid[i][j].update(nclock.dt, I_inj = 20*(j==currline))
+	for i in range(0, neuronrows):
+		for j in range(0, neuroncols):
+			neurongrid[i][j].update(nclock.dt, I_inj = 20*currimg[i][j])
 	
 	update_grid_neurons(oncoffs)
 	update_grid_neurons(offcons)

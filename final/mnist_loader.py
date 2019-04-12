@@ -1,8 +1,9 @@
 import numpy as np
+import os.path
 NUM_SAMPLES = 100 # number of samples to include <= 10000
 
 from mnist import MNIST
-mndata = MNIST('dataset')
+mndata = MNIST(os.path.abspath('dataset'))
 images,labels = mndata.load_testing()
 
 # Get a numpy array of images
