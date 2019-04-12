@@ -4,8 +4,9 @@ from mnist import MNIST
 mndata = MNIST('dataset')
 images,labels = mndata.load_testing()
 
-def get_numpy_array():
+# Get a numpy array of images
+def get_numpy_array(num_samples=NUM_SAMPLES):
     arr = []
-    for i in range(0,NUM_SAMPLES):
+    for i in range(0,num_samples):
         arr.append(images[i])
     return arr
