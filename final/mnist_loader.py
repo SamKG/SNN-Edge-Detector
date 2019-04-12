@@ -8,5 +8,13 @@ images,labels = mndata.load_testing()
 def get_numpy_array(num_samples=NUM_SAMPLES):
     arr = []
     for i in range(0,num_samples):
-        arr.append(images[i])
+        image = []
+        for pixl in images[i]:
+            if pixl == 0:
+                image.append(0)
+            else:
+                image.append(1)
+        arr.append(image)
+        #print(len(image))
+    #print('retrieved',len(arr))
     return arr
