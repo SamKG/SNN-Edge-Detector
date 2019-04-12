@@ -25,7 +25,6 @@ nclock = timemodule.Clock(dt)
 allimages = get_numpy_array()
 imgindex = 0
 currimg = allimages[imgindex]
-print(currimg)
 
 neurongrid = []
 '''
@@ -34,11 +33,12 @@ spacing = 45 * scale
 neuroncols = int(float(size[0])/spacing)
 neuronrows = int(float(size[1])/spacing)
 '''
-nneurons = 28
+nneurons = 29
 neuroncols = nneurons
 neuronrows = nneurons
-spacing = 42
-scale = int(float(nsize)/nneurons)
+spacing = 29
+scale = 14.5/20
+print(scale)
 
 for i in range(1, neuronrows):
 	row = []
@@ -188,9 +188,9 @@ while not done:
 		draw_grid_synapses(receptivefield)
 		draw_grid_neurons(receptivefield)
 			
-	for i in range(0, neuronrows):
-		for j in range(0, neuroncols):
-			neurongrid[i][j].update(nclock.dt, I_inj = 20*currimg[i][j])
+	for i in range(0, neuronrows-1):
+		for j in range(0, neuroncols-1):
+			neurongrid[i][j].update(nclock.dt, I_inj = 10*currimg[i][j])
 	
 	update_grid_neurons(oncoffs)
 	update_grid_neurons(offcons)
