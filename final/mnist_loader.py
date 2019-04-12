@@ -1,3 +1,4 @@
+import numpy as np
 NUM_SAMPLES = 100 # number of samples to include <= 10000
 
 from mnist import MNIST
@@ -14,7 +15,7 @@ def get_numpy_array(num_samples=NUM_SAMPLES):
                 image.append(0)
             else:
                 image.append(1)
-        arr.append(image)
+        arr.append(np.array(image))
         #print(len(image))
     #print('retrieved',len(arr))
     return arr
