@@ -19,6 +19,8 @@ BLACK = (0,0,0)
 done = False
 
 dt = 0.01
+timescale = 4
+newtimestep = dt*timescale
 
 nclock = timemodule.Clock(dt)
 
@@ -36,9 +38,12 @@ neuronrows = int(float(size[1])/spacing)
 nneurons = 29
 neuroncols = nneurons
 neuronrows = nneurons
-spacing = 29
-scale = 14.5/20
+
+spacing = 29.5
+scalefactor = 0.8
+scale = 20/(nsize/float(spacing))*scalefactor
 print(scale)
+print(14.5/20)
 
 for i in range(1, neuronrows):
 	row = []
@@ -170,8 +175,6 @@ while not done:
 	
 	screen.fill(BLACK)
 	
-	currtime = nclock.get_time()
-	
 	if draw == 0:
 		draw_grid_neurons(neurongrid)
 		draw_grid_synapses(neurongrid)
@@ -187,17 +190,24 @@ while not done:
 	if draw == 3:
 		draw_grid_synapses(receptivefield)
 		draw_grid_neurons(receptivefield)
-			
-	for i in range(0, neuronrows-1):
-		for j in range(0, neuroncols-1):
-			neurongrid[i][j].update(nclock.dt, I_inj = 10*currimg[i][j])
 	
-	update_grid_neurons(oncoffs)
-	update_grid_neurons(offcons)
-	
-	update_grid_neurons(receptivefield)
-	
-	nclock.tick()
+	this_time = 0
+	while this_time < newtimestep:
+		this_time += dt
+		
+		currtime = nclock.get_time()
+		
+		for i in range(0, neuronrows-1):
+			for j in range(0, neuroncols-1):
+				neurongrid[i][j].update(nclock.dt, I_inj = 10*currimg[i][j])
+		
+		update_grid_neurons(oncoffs)
+		update_grid_neurons(offcons)
+		
+		update_grid_neurons(receptivefield)
+		
+		nclock.tick()
+		
 	fc += 1
 	
 	pygame.display.flip()
