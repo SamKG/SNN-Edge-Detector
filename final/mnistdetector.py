@@ -42,6 +42,7 @@ scale = 20/(nsize/float(spacing))*scalefactor
 print(scale)
 print(14.5/20)
 
+# photoreceptive layer
 for i in range(0, neuronrows):
 	row = []
 	for j in range(0, neuroncols):
@@ -93,7 +94,27 @@ for i in range(0, neuronrows):
 				rotation_2 *= 1j
 			
 	oncoffs.append(oncoffsrow)
-	offcons.append(offconsrow)	
+	offcons.append(offconsrow)
+	
+	# Line detecting ganglion cells
+	# each neuron is responsible for detecting its own 3x3 block of on-center off-surround cells surrounding the neuron
+
+	BLOCK_SIZE = 3
+	line_detectors = []
+	for i in range(0,len(oncoffs[0])):
+		row = []
+		for j in range(0,len(oncoffs[0])):
+			new_neuron = NeuronG(pos = oncoffs[i][j].pos , scale = scale, color = custom_color)
+			row.append(new_neuron)
+			top_left_i = i - BLOCK_SIZE//2
+			top_left_j = j - BLOCK_SIZE//2
+			for bdx in range(0,BLOCK_SIZE*BLOCK_SIZE):
+				tmp_i = top_left_i + bdx//BLOCK_SIZE
+				tmp_j = top_left_j + (bdx%BLOCK_SIZE)
+				if (tmp_i >= 0 and tmp_i < len(oncoffs[0])) and (tmp_j >= 0 and tmp_j < len(oncoffs[0])):
+					new_neuron.add_syn(oncoffs[tmp_j][tmp_i], winit = 1, tau = 2)
+					new_neuron.add_syn(oncoffs[tmp_j][tmp_i], winit = 1, tau = 2)
+		line_detectors.append(row)
 		
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
