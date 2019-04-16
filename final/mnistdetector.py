@@ -29,12 +29,6 @@ imgindex = 0
 currimg = allimages[imgindex]
 
 neurongrid = []
-'''
-scale = 0.55
-spacing = 45 * scale
-neuroncols = int(float(size[0])/spacing)
-neuronrows = int(float(size[1])/spacing)
-'''
 nneurons = 29
 neuroncols = nneurons
 neuronrows = nneurons
@@ -69,7 +63,7 @@ for i in range(1, neuronrows-2):
 								w_init = 1, tau = 2, sign=1)
 		# Off center
 		newoffcons.add_syn(neurongrid[i][j],
-							w_init = 0.6, tau = 1, sign=-1)
+							w_init = 1, tau = 1, sign=-1)
 		
 		rotation_1 = 1 + 1j
 		rotation_2 = 1
@@ -77,43 +71,19 @@ for i in range(1, neuronrows-2):
 			curr_i = int(rotation_1.imag) + i
 			curr_j = int(rotation_1.real) + j
 			# Off surround
-			try:
-				newoncoffs.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.3, sign=-1)
-			except Exception as e:
-				print("ngrid rows = ", len(neurongrid))
-				print("ngrid cols = ", len(neurongrid[0]))
-				print("i = ", i, "j = ", j, "curr_i = ", curr_i, "curr_j = ", curr_j)
-				raise(e)
+			newoncoffs.add_syn(neurongrid[curr_i][curr_j],
+								w_init = 0.3, sign=-1)
 			# On surround
-			try:
-				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.3, sign=1)
-			except Exception as e:
-				print("ngrid rows = ", len(neurongrid))
-				print("ngrid cols = ", len(neurongrid[0]))
-				print("i = ", i, "j = ", j, "curr_i = ", curr_i, "curr_j = ", curr_j)
-				raise(e)					
+			newoffcons.add_syn(neurongrid[curr_i][curr_j],
+								w_init = 0.1, sign=1)				
 			curr_i = int(rotation_2.imag) + i
 			curr_j = int(rotation_2.real) + j
 			# Off surround
-			try:
-				newoncoffs.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.3, sign=-1)
-			except Exception as e:
-				print("ngrid rows = ", len(neurongrid))
-				print("ngrid cols = ", len(neurongrid[0]))
-				print("i = ", i, "j = ", j, "curr_i = ", curr_i, "curr_j = ", curr_j)
-				raise(e)	
+			newoncoffs.add_syn(neurongrid[curr_i][curr_j],
+								w_init = 0.1, sign=-1)
 			# On surround
-			try:
-				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.3, sign=1)
-			except Exception as e:
-				print("ngrid rows = ", len(neurongrid))
-				print("ngrid cols = ", len(neurongrid[0]))
-				print("i = ", i, "j = ", j, "curr_i = ", curr_i, "curr_j = ", curr_j)
-				raise(e)	
+			newoffcons.add_syn(neurongrid[curr_i][curr_j],
+								w_init = 0.3, sign=1)
 			rotation_1 *= 1j
 			rotation_2 *= 1j
 			
