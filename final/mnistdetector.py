@@ -11,6 +11,9 @@ def within_bounds(x, x_l, x_r):
 
 pygame.init()
 
+DRAW_NEURONS = True
+BLOCK_SIZE = 3
+
 nsize = 855
 size = (nsize,nsize)
 screen = pygame.display.set_mode(size)
@@ -22,7 +25,7 @@ BLACK = (0,0,0)
 done = False
 
 dt = 0.01
-timescale = 4
+timescale = 100
 newtimestep = dt*timescale
 
 nclock = timemodule.Clock(dt)
@@ -95,27 +98,28 @@ for i in range(0, neuronrows):
 			
 	oncoffs.append(oncoffsrow)
 	offcons.append(offconsrow)
-	
-	# Line detecting ganglion cells
-	# each neuron is responsible for detecting its own 3x3 block of on-center off-surround cells surrounding the neuron
 
-	BLOCK_SIZE = 3
-	line_detectors = []
-	for i in range(0,len(oncoffs[0])):
-		row = []
-		for j in range(0,len(oncoffs[0])):
-			new_neuron = NeuronG(pos = oncoffs[i][j].pos , scale = scale, color = custom_color)
-			row.append(new_neuron)
-			top_left_i = i - BLOCK_SIZE//2
-			top_left_j = j - BLOCK_SIZE//2
-			for bdx in range(0,BLOCK_SIZE*BLOCK_SIZE):
-				tmp_i = top_left_i + bdx//BLOCK_SIZE
-				tmp_j = top_left_j + (bdx%BLOCK_SIZE)
-				if (tmp_i >= 0 and tmp_i < len(oncoffs[0])) and (tmp_j >= 0 and tmp_j < len(oncoffs[0])):
-					new_neuron.add_syn(oncoffs[tmp_j][tmp_i], winit = 1, tau = 2)
-					new_neuron.add_syn(oncoffs[tmp_j][tmp_i], winit = 1, tau = 2)
-		line_detectors.append(row)
-		
+# Line detecting ganglion cells
+# each neuron is responsible for detecting its own 3x3 block of on-center off-surround cells surrounding the neuron
+
+
+line_detectors = []
+for i in range(0,len(oncoffs[0])):
+	row = []
+	for j in range(0,len(oncoffs[0])):
+		new_neuron = NeuronG(pos = oncoffs[i][j].pos , scale = scale, color = custom_color)
+		row.append(new_neuron)
+		top_left_i = i - BLOCK_SIZE//2
+		top_left_j = j - BLOCK_SIZE//2
+		for bdx in range(0,BLOCK_SIZE*BLOCK_SIZE):
+			tmp_i = top_left_i + bdx//BLOCK_SIZE
+			tmp_j = top_left_j + (bdx%BLOCK_SIZE)
+			print(tmp_i,tmp_j,top_left_i,top_left_j)
+			if (tmp_i >= 0 and tmp_i < len(oncoffs[0])) and (tmp_j >= 0 and tmp_j < len(oncoffs[0])):
+				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 1, tau = 2)
+				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = 1, tau = 2)
+	line_detectors.append(row)
+
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
 		for neuron in nrow:
@@ -157,20 +161,22 @@ while not done:
 	
 	screen.fill(BLACK)
 	
-	if draw == 0:
-		draw_grid_neurons(neurongrid)
-		draw_grid_synapses(neurongrid)
-	
-	if draw == 1:
-		draw_grid_neurons(offcons)
-		draw_grid_synapses(offcons)
-	
-	if draw == 2:
-		draw_grid_neurons(oncoffs)
-		draw_grid_synapses(oncoffs)
-	
-	if draw == 3:
-		pass
+	if DRAW_NEURONS:
+		if draw == 0:
+			draw_grid_neurons(neurongrid)
+			draw_grid_synapses(neurongrid)
+		
+		if draw == 1:
+			draw_grid_neurons(offcons)
+			draw_grid_synapses(offcons)
+		
+		if draw == 2:
+			draw_grid_neurons(oncoffs)
+			draw_grid_synapses(oncoffs)
+		
+		if draw == 3:
+			draw_grid_synapses(line_detectors)
+			draw_grid_neurons(line_detectors)
 	
 	this_time = 0
 	while this_time < newtimestep:
@@ -184,7 +190,7 @@ while not done:
 		
 		update_grid_neurons(oncoffs)
 		update_grid_neurons(offcons)
-		
+		update_grid_neurons(line_detectors)
 		nclock.tick()
 		
 	fc += 1
