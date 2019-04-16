@@ -39,6 +39,8 @@ scale = 20/(nsize/float(spacing))*scalefactor
 print(scale)
 print(14.5/20)
 
+
+# photoreceptive layer
 for i in range(1, neuronrows):
 	row = []
 	for j in range(1, neuroncols):
@@ -90,19 +92,25 @@ for i in range(1, neuronrows-2):
 	oncoffs.append(oncoffsrow)
 	offcons.append(offconsrow)
 	
-	# Ganglion cells
-	receptivefield = []
-	receptivefieldrow = []
-	for i in range(1,len(oncoffs[0])-1):
-		currloc = oncoffs[int(len(oncoffs)/2)][i]
-		newrc = NeuronG((currloc.pos), scale = scale, color = custom_color)
-		receptivefieldrow.append(newrc)
-		for j in range(len(oncoffs)):
-			newrc.add_syn(oncoffs[j][i], winit = 1, tau = 2)
-			newrc.add_syn(offcons[j][i-1], winit = 0.05, tau = 0.5, sign = -1)
-			newrc.add_syn(offcons[j][i+1], winit = 0.05, tau = 0.5, sign = -1)
-		
-	receptivefield.append(receptivefieldrow)	
+	# Line detecting ganglion cells
+	# each neuron is responsible for detecting its own 3x3 block of on-center off-surround cells surrounding the neuron
+
+	BLOCK_SIZE = 3
+	line_detectors = []
+	for i in range(0,len(oncoffs[0])):
+		row = []
+		for j in range(0,len(oncoffs[0])):
+			new_neuron = NeuronG(pos = oncoffs[i][j].pos , scale = scale, color = custom_color)
+			row.append(new_neuron)
+			top_left_i = i - BLOCK_SIZE//2
+			top_left_j = j - BLOCK_SIZE//2
+			for bdx in range(0,BLOCK_SIZE*BLOCK_SIZE):
+				tmp_i = top_left_i + bdx//BLOCK_SIZE
+				tmp_j = top_left_j + (bdx%BLOCK_SIZE)
+				if (tmp_i >= 0 and tmp_i < len(oncoffs[0])) and (tmp_j >= 0 and tmp_j < len(oncoffs[0])):
+					new_neuron.add_syn(oncoffs[tmp_j][tmp_i], winit = 1, tau = 2)
+					new_neuron.add_syn(oncoffs[tmp_j][tmp_i], winit = 1, tau = 2)
+		line_detectors.append(row)
 		
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
