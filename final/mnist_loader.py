@@ -27,6 +27,15 @@ def get_numpy_array(num_samples=NUM_SAMPLES):
     #print('retrieved',len(arr))
     return arr
 
+# get an array of smaller testcases
+def get_testcase():
+    arr = []
+    arr[0] = [
+        [1,1,1],
+        [0,0,0],
+        [0,0,0]
+    ]
+    return arr
 if __name__ == "__main__":
     print('run test')
     images = get_numpy_array()
