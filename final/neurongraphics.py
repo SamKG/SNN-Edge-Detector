@@ -7,7 +7,7 @@ class NeuronG(Neuron):
 		self.pos = pos
 		self.scale = scale
 		val = int(self.v / self.threshold)
-		self.custom_color = kwargs.get('color', None)
+		self.custom_color = kwargs.get('custom_color', None)
 		if self.custom_color is None:
 			self.color = (val,0,255-val)
 		else:

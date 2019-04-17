@@ -25,7 +25,7 @@ BLACK = (0,0,0)
 done = False
 
 dt = 0.01
-timescale = 100
+timescale = 4
 newtimestep = dt*timescale
 
 nclock = timemodule.Clock(dt)
@@ -61,16 +61,16 @@ for i in range(0, neuronrows):
 	oncoffsrow = []
 	offconsrow = []
 	for j in range(0, neuroncols):
-		newoncoffs = NeuronG(neurongrid[i][j].pos+(5,5), scale = scale, color = custom_color)
+		newoncoffs = NeuronG(neurongrid[i][j].pos+(5,5), scale = scale, custom_color = custom_color)
 		oncoffsrow.append(newoncoffs)
-		newoffcons = NeuronG(neurongrid[i][j].pos+(5,5), scale = scale, color = custom_color)
+		newoffcons = NeuronG(neurongrid[i][j].pos+(5,5), scale = scale, custom_color = custom_color)
 		offconsrow.append(newoffcons)
 		# On center
 		newoncoffs.add_syn(neurongrid[i][j],
 								w_init = 1, tau = 2, sign=1)
 		# Off center
 		newoffcons.add_syn(neurongrid[i][j],
-							w_init = 1, tau = 1, sign=-1)
+							w_init = 1, tau = 2, sign=-1)
 		
 		rotation_1 = 1 + 1j
 		rotation_2 = 1
@@ -80,19 +80,19 @@ for i in range(0, neuronrows):
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
 				# Off surround
 				newoncoffs.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.3, sign=-1)
+									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.1, sign=1)				
+									w_init = 0.2, sign=1)				
 			curr_i = int(rotation_2.imag) + i
 			curr_j = int(rotation_2.real) + j
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
 				# Off surround
 				newoncoffs.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.1, sign=-1)
+									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.3, sign=1)
+									w_init = 0.2, sign=1)
 				rotation_1 *= 1j
 				rotation_2 *= 1j
 			
@@ -107,14 +107,14 @@ line_detectors = []
 for i in range(0,len(oncoffs[0])):
 	row = []
 	for j in range(0,len(oncoffs[0])):
-		new_neuron = NeuronG(pos = oncoffs[i][j].pos , scale = scale, color = custom_color)
+		new_neuron = NeuronG(pos = oncoffs[i][j].pos , scale = scale, custom_color = custom_color)
 		row.append(new_neuron)
 		top_left_i = i - BLOCK_SIZE//2
 		top_left_j = j - BLOCK_SIZE//2
 		for bdx in range(0,BLOCK_SIZE*BLOCK_SIZE):
 			tmp_i = top_left_i + bdx//BLOCK_SIZE
 			tmp_j = top_left_j + (bdx%BLOCK_SIZE)
-			print(tmp_i,tmp_j,top_left_i,top_left_j)
+			#print(tmp_i,tmp_j,top_left_i,top_left_j)
 			if (tmp_i >= 0 and tmp_i < len(oncoffs[0])) and (tmp_j >= 0 and tmp_j < len(oncoffs[0])):
 				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 1, tau = 2)
 				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = 1, tau = 2)
@@ -146,6 +146,8 @@ while not done:
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_SPACE:
 				draw = (draw+1)%4
+			if event.key == pygame.K_BACKSPACE:
+				draw = (draw-1)%4*(not draw-1 <= 0)
 			if event.key == pygame.K_LEFT:
 				imgindex -= 1
 			if event.key == pygame.K_RIGHT:
