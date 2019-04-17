@@ -83,7 +83,7 @@ for i in range(0, neuronrows):
 									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=1)				
+									w_init = 0.25, sign=1)				
 			curr_i = int(rotation_2.imag) + i
 			curr_j = int(rotation_2.real) + j
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
@@ -92,7 +92,7 @@ for i in range(0, neuronrows):
 									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=1)
+									w_init = 0.25, sign=1)
 				rotation_1 *= 1j
 				rotation_2 *= 1j
 			
