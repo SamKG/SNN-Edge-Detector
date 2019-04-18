@@ -101,12 +101,10 @@ for i in range(0, neuronrows):
 
 # Line detecting ganglion cells
 # each neuron is responsible for detecting its own 3x3 block of on-center off-surround cells surrounding the neuron
-
-
 line_detectors = []
-for i in range(0,len(oncoffs[0])):
+for i in range(0,neuronrows):
 	row = []
-	for j in range(0,len(oncoffs[0])):
+	for j in range(0,neuroncols):
 		new_neuron = NeuronG(pos = oncoffs[i][j].pos , scale = scale, custom_color = custom_color)
 		row.append(new_neuron)
 		top_left_i = i - BLOCK_SIZE//2
@@ -115,7 +113,7 @@ for i in range(0,len(oncoffs[0])):
 			tmp_i = top_left_i + bdx//BLOCK_SIZE
 			tmp_j = top_left_j + (bdx%BLOCK_SIZE)
 			#print(tmp_i,tmp_j,top_left_i,top_left_j)
-			if (tmp_i >= 0 and tmp_i < len(oncoffs[0])) and (tmp_j >= 0 and tmp_j < len(oncoffs[0])):
+			if (tmp_i >= 0 and tmp_i < neuronrows) and (tmp_j >= 0 and tmp_j < neuroncols):
 				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 1, tau = 2)
 				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = 1, tau = 2)
 	line_detectors.append(row)
@@ -135,7 +133,7 @@ def update_grid_neurons(neurongrid):
 		for neuron in nrow:
 			neuron.update(nclock.dt)
 
-draw = 0
+draw_type = 0
 fc = 0
 currline = 0
 while not done:
@@ -145,9 +143,9 @@ while not done:
 			done = True
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_SPACE:
-				draw = (draw+1)%4
+				draw_type = (draw_type+1)%4
 			if event.key == pygame.K_BACKSPACE:
-				draw = (draw-1)%4*(not draw-1 <= 0)
+				draw_type = (draw_type-1)%4
 			if event.key == pygame.K_LEFT:
 				imgindex -= 1
 			if event.key == pygame.K_RIGHT:
@@ -164,19 +162,19 @@ while not done:
 	screen.fill(BLACK)
 	
 	if DRAW_NEURONS:
-		if draw == 0:
+		if draw_type == 0:
 			draw_grid_neurons(neurongrid)
 			draw_grid_synapses(neurongrid)
 		
-		if draw == 1:
+		if draw_type == 1:
 			draw_grid_neurons(offcons)
 			draw_grid_synapses(offcons)
 		
-		if draw == 2:
+		if draw_type == 2:
 			draw_grid_neurons(oncoffs)
 			draw_grid_synapses(oncoffs)
 		
-		if draw == 3:
+		if draw_type == 3:
 			draw_grid_synapses(line_detectors)
 			draw_grid_neurons(line_detectors)
 	
