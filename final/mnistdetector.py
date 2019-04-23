@@ -1,44 +1,111 @@
 import pygame
+import os
+import subprocess
 import math
 import numpy as np
 import random
 import timemodule
 from neurongraphics import NeuronG
-from mnist_loader import *
+import mnist_loader
+
+# Color constant for black
+BLACK = (0,0,0)
+WHITE = (255,255,255)
 
 def within_bounds(x, x_l, x_r):
 	return x >= x_l and x <= x_r
 
+class Label:
+	def __init__(self, init_idx=0):
+		self.font = pygame.font.SysFont("Segoe UI", 65)
+		self.labels = {0:"Photoreceptors", 1:"Off-Center-On-Surround",
+					2:"On-Center-Off-Surround", 3:"Ganglion"}
+		self.anim_dur = 0
+		self.anim_curr = 0
+		self.currlabel = self.font.render(self.labels[init_idx], True, WHITE)
+		self.alphasurf = pygame.Surface(self.currlabel.get_size(),
+										pygame.SRCALPHA)
+		self.alphasurf.fill((255,255,255,0))
+		self.currlabel.blit(self.alphasurf, (0,0), 
+							special_flags=pygame.BLEND_RGBA_MULT)
+	
+	def update_label(self, idx):
+		self.currlabel = self.font.render(self.labels[idx], True, WHITE)
+		self.alphasurf = pygame.Surface(self.currlabel.get_size(),
+										pygame.SRCALPHA)
+	
+	def anim_start(self, dur):
+		self.anim_dur = dur
+		self.anim_curr = 0
+		self.alphasurf.fill((255,255,255,255-int(255*self.anim_curr/self.anim_dur)))
+		self.currlabel.blit(self.alphasurf, (0,0), 
+							special_flags=pygame.BLEND_RGBA_MULT)
+	
+	def anim_update(self):
+		if self.anim_curr < self.anim_dur:
+			self.anim_curr += 1
+			self.alphasurf.fill((255,255,255,255-int(255*self.anim_curr/self.anim_dur)))
+			self.currlabel.blit(self.alphasurf, (0,0), 
+								special_flags=pygame.BLEND_RGBA_MULT)
+	
+	def draw(self, screen, pos):
+		screen.blit(self.currlabel, pos)
+
 pygame.init()
 
-DRAW_NEURONS = True
-BLOCK_SIZE = 3
+# Making the directory for storing frames
+frame_dir = "frames"
+try:
+	os.makedirs(frame_dir)
+except FileExistsError:
+	filestoremove = [os.path.abspath(os.path.join(frame_dir, f)) 
+		for f in os.listdir(frame_dir) 
+		if os.path.isfile(os.path.join(frame_dir, f))]
+	for f in filestoremove:
+		os.remove(f)
 
-nsize = 855
+curr_recording_idx = 0	
+# Making the directory for the video
+record_dir = "recordings"
+try:
+	os.makedirs(record_dir)
+except FileExistsError:
+	videofiles = [f for f in os.listdir(record_dir)
+					if os.path.isfile(os.path.join(record_dir, f))]
+	if not (not videofiles):
+		vfnums = [int(os.path.splitext(vf)[0]) for vf in videofiles]
+		curr_recording_idx = max(vfnums)+1
+
+# Constant for whether to draw
+DRAW_NEURONS = True
+
+# Defines the screen
+nsize = 856
 size = (nsize,nsize)
 screen = pygame.display.set_mode(size)
 
+# Creates the game clock
 gclock = pygame.time.Clock()
-
-BLACK = (0,0,0)
 
 done = False
 
+# Time stuff for neuron updating
 dt = 0.01
 timescale = 4
 newtimestep = dt*timescale
 
 nclock = timemodule.Clock(dt)
 
-allimages = get_numpy_array()
+# Getting the MNIST images for the photoreceptive layer
+allimages = mnist_loader.get_numpy_array()
 imgindex = 0
 currimg = allimages[imgindex]
 
+# Defining constants for our neuron grid size and neuron scale and spacing
 neurongrid = []
 nneurons = 28
 neuroncols = nneurons
 neuronrows = nneurons
-
 spacing = 29.5
 scalefactor = 0.8
 scale = 20/(nsize/float(spacing))*scalefactor
@@ -83,7 +150,7 @@ for i in range(0, neuronrows):
 									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.25, sign=1)				
+									w_init = 0.2, sign=1)				
 			curr_i = int(rotation_2.imag) + i
 			curr_j = int(rotation_2.real) + j
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
@@ -92,12 +159,15 @@ for i in range(0, neuronrows):
 									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.25, sign=1)
+									w_init = 0.2, sign=1)
 				rotation_1 *= 1j
 				rotation_2 *= 1j
 			
 	oncoffs.append(oncoffsrow)
 	offcons.append(offconsrow)
+
+# Constant for line detecting ganglion cells
+BLOCK_SIZE = 3	
 
 # Line detecting ganglion cells
 # each neuron is responsible for detecting its own 3x3 block of on-center off-surround cells surrounding the neuron
@@ -114,8 +184,8 @@ for i in range(0,neuronrows):
 			tmp_j = top_left_j + (bdx%BLOCK_SIZE)
 			#print(tmp_i,tmp_j,top_left_i,top_left_j)
 			if (tmp_i >= 0 and tmp_i < neuronrows) and (tmp_j >= 0 and tmp_j < neuroncols):
-				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 1, tau = 2)
-				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = 1, tau = 2)
+				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 0.05, tau = 4, sign = -1)
+				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = 1, tau = 8)
 	line_detectors.append(row)
 
 def draw_grid_neurons(neurongrid):
@@ -134,8 +204,17 @@ def update_grid_neurons(neurongrid):
 			neuron.update(nclock.dt)
 
 draw_type = 0
+record = False
+saved_frame = 0
 fc = 0
-currline = 0
+framerate = 20
+
+mylabel = Label(draw_type)
+mylabelpos = [size[0]/2-mylabel.currlabel.get_size()[0]/2,50]
+labelanimlen = 300
+mylabel.update_label(draw_type)
+mylabel.anim_start(labelanimlen)
+
 while not done:
 	pressed = False
 	for event in pygame.event.get():
@@ -144,17 +223,20 @@ while not done:
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_SPACE:
 				draw_type = (draw_type+1)%4
+				mylabel.update_label(draw_type)
+				mylabel.anim_start(labelanimlen)
+				mylabelpos = [size[0]/2-mylabel.currlabel.get_size()[0]/2,50]
 			if event.key == pygame.K_BACKSPACE:
 				draw_type = (draw_type-1)%4
+				mylabel.update_label(draw_type)
+				mylabel.anim_start(labelanimlen)
+				mylabelpos = [size[0]/2-mylabel.currlabel.get_size()[0]/2,50]
 			if event.key == pygame.K_LEFT:
-				imgindex -= 1
+				imgindex = (imgindex-1)%neuroncols
 			if event.key == pygame.K_RIGHT:
-				imgindex += 1
-		
-	if currline < 0:
-		imgindex = 0
-	if imgindex > neuroncols-1:
-		imgindex = neuroncols-1
+				imgindex = (imgindex+1)%neuroncols
+			if event.key == pygame.K_r:
+				record = not record
 	
 	currimg = allimages[imgindex]
 				
@@ -165,18 +247,22 @@ while not done:
 		if draw_type == 0:
 			draw_grid_neurons(neurongrid)
 			draw_grid_synapses(neurongrid)
+			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 1:
 			draw_grid_neurons(offcons)
 			draw_grid_synapses(offcons)
+			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 2:
 			draw_grid_neurons(oncoffs)
 			draw_grid_synapses(oncoffs)
+			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 3:
 			draw_grid_synapses(line_detectors)
 			draw_grid_neurons(line_detectors)
+			mylabel.draw(screen, mylabelpos)
 	
 	this_time = 0
 	while this_time < newtimestep:
@@ -186,16 +272,32 @@ while not done:
 		
 		for i in range(0, neuronrows):
 			for j in range(0, neuroncols):
-				neurongrid[i][j].update(nclock.dt, I_inj = 10*currimg[i][j])
+				neurongrid[i][j].update(nclock.dt, I_inj = 20*currimg[i][j])
 		
 		update_grid_neurons(oncoffs)
 		update_grid_neurons(offcons)
 		update_grid_neurons(line_detectors)
 		nclock.tick()
 		
+		mylabel.anim_update()
+		
 	fc += 1
 	
+	if record:
+		pygame.image.save(screen, 
+			os.path.join(frame_dir,('img%d' % saved_frame)+".png"))
+		saved_frame += 1
 	pygame.display.flip()
-	gclock.tick(20)
+	gclock.tick(framerate)
 
 pygame.quit()
+
+frames_exist = not not [f for f in os.listdir(frame_dir) 
+			if os.path.isfile(os.path.join(frame_dir, f))]
+if frames_exist:
+	inputfilestring = frame_dir + '/' + 'img%d.png'
+	outputfilestring = record_dir + '/' + str(curr_recording_idx)+'.mp4'
+	ffmpegpath = "ffmpeg"
+	subprocess.call([ffmpegpath, '-framerate', str(framerate//4), 
+	'-i', inputfilestring, '-crf', str(framerate//4), '-pix_fmt', 'yuv420p', 
+	outputfilestring])
