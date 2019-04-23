@@ -121,9 +121,9 @@ class Neuron:
 		# no synaptic connections
 		if self.isteacher or self.isinput:
 			I_total = I_inj
-		# Otherwise aggregate all the weighted synaptic inputs
+		# Otherwise aggregate all the weighted synaptic inputs and injected current
 		else:
-			I_total = self.I_syn()
+			I_total = self.I_syn() + I_inj
 		if math.isnan(I_total):
 			raise Exception("Current is NaN")
 		# Leaky integrate and fire dynamics

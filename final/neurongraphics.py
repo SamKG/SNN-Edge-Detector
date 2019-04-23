@@ -28,7 +28,7 @@ class NeuronG(Neuron):
 		return vout
 	
 	def draw_synapses(self, screen):
-		maxI = 10
+		maxI = 2
 		for syn in self.syns:
 			synval = syn.I
 			if synval > maxI:
