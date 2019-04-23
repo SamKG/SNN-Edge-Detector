@@ -71,7 +71,7 @@ try:
 	os.makedirs(record_dir)
 except FileExistsError:
 	videofiles = [f for f in os.listdir(record_dir)
-					if os.path.isfile(os.path.join(record_dir, f))]
+					if (os.path.isfile(os.path.join(record_dir, f)) and f != ".gitignore")]
 	if not (not videofiles):
 		vfnums = [int(os.path.splitext(vf)[0]) for vf in videofiles]
 		curr_recording_idx = max(vfnums)+1
