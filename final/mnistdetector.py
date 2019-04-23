@@ -200,10 +200,10 @@ def draw_grid_synapses(neurongrid):
 		for neuron in nrow:
 			neuron.draw_synapses(screen)
 
-def update_grid_neurons(neurongrid):
+def update_grid_neurons(neurongrid, I_inj = 0):
 	for nrow in neurongrid:
 		for neuron in nrow:
-			neuron.update(nclock.dt)
+			neuron.update(nclock.dt, I_inj = I_inj)
 
 draw_type = 0
 record = False
