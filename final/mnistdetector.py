@@ -134,10 +134,10 @@ for i in range(0, neuronrows):
 		offconsrow.append(newoffcons)
 		# On center
 		newoncoffs.add_syn(neurongrid[i][j],
-								w_init = 1, tau = 2, sign=1)
+								w_init = 1, tau = 1, sign=1)
 		# Off center
 		newoffcons.add_syn(neurongrid[i][j],
-							w_init = 1, tau = 2, sign=-1)
+							w_init = 1, tau = 1, sign=-1)
 		
 		rotation_1 = 1 + 1j
 		rotation_2 = 1
@@ -150,7 +150,7 @@ for i in range(0, neuronrows):
 									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=1)				
+									w_init = 0.1, sign=1)				
 			curr_i = int(rotation_2.imag) + i
 			curr_j = int(rotation_2.real) + j
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
@@ -159,7 +159,7 @@ for i in range(0, neuronrows):
 									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=1)
+									w_init = 0.1, sign=1)
 				rotation_1 *= 1j
 				rotation_2 *= 1j
 			
@@ -273,9 +273,8 @@ while not done:
 		for i in range(0, neuronrows):
 			for j in range(0, neuroncols):
 				neurongrid[i][j].update(nclock.dt, I_inj = 20*currimg[i][j])
-		
-		update_grid_neurons(oncoffs)
-		update_grid_neurons(offcons)
+		update_grid_neurons(oncoffs, I_inj = 1)
+		update_grid_neurons(offcons, I_inj = 1)
 		update_grid_neurons(line_detectors)
 		nclock.tick()
 		
