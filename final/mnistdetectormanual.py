@@ -17,7 +17,7 @@ def within_bounds(x, x_l, x_r):
 
 class Label:
 	def __init__(self, init_idx=0):
-		self.font = pygame.font.SysFont("Segoe UI", 80)
+		self.font = pygame.font.SysFont("Segoe UI", 65)
 		self.labels = {0:"Photoreceptors", 1:"Off-Center-On-Surround",
 					2:"On-Center-Off-Surround", 3:"Ganglion"}
 		self.anim_dur = 0
@@ -150,7 +150,7 @@ for i in range(0, neuronrows):
 									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.25, sign=1)				
+									w_init = 0.2, sign=1)				
 			curr_i = int(rotation_2.imag) + i
 			curr_j = int(rotation_2.real) + j
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
@@ -159,7 +159,7 @@ for i in range(0, neuronrows):
 									w_init = 0.2, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.25, sign=1)
+									w_init = 0.2, sign=1)
 				rotation_1 *= 1j
 				rotation_2 *= 1j
 			
@@ -184,8 +184,8 @@ for i in range(0,neuronrows):
 			tmp_j = top_left_j + (bdx%BLOCK_SIZE)
 			#print(tmp_i,tmp_j,top_left_i,top_left_j)
 			if (tmp_i >= 0 and tmp_i < neuronrows) and (tmp_j >= 0 and tmp_j < neuroncols):
-				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 1, tau = 2)
-				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = 1, tau = 2)
+				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 0.05, tau = 4, sign = -1)
+				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = 1, tau = 8)
 	line_detectors.append(row)
 
 def draw_grid_neurons(neurongrid):
@@ -272,7 +272,7 @@ while not done:
 		
 		for i in range(0, neuronrows):
 			for j in range(0, neuroncols):
-				neurongrid[i][j].update(nclock.dt, I_inj = 10*currimg[i][j])
+				neurongrid[i][j].update(nclock.dt, I_inj = 20*currimg[i][j])
 		
 		update_grid_neurons(oncoffs)
 		update_grid_neurons(offcons)
