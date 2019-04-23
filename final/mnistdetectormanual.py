@@ -137,7 +137,7 @@ for i in range(0, neuronrows):
 								w_init = 1, tau = 2, sign=1)
 		# Off center
 		newoffcons.add_syn(neurongrid[i][j],
-							w_init = 1, tau = 2, sign=-1)
+							w_init = 1, tau = 1, sign=-1)
 		
 		rotation_1 = 1 + 1j
 		rotation_2 = 1
