@@ -109,6 +109,13 @@ class Neuron:
 			if(len(self.spikes) > t_window/dt):
 						self.spikes.popleft()
 	
+	def get_firing_rate(self):
+		print(self.spikes)
+		if len(self.spikes) > 0:
+			return int(sum(self.spikes)/len(self.spikes))
+		else:
+			return 0
+	
 	def update(self, dt, I_inj = 0, learn = False):
 		if not self.isteacher:
 			for syn in self.syns:
