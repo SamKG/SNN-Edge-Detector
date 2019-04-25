@@ -91,7 +91,7 @@ done = False
 
 # Time stuff for neuron updating
 dt = 0.01
-timescale = 10
+timescale = 4
 newtimestep = dt*timescale
 
 nclock = timemodule.Clock(dt)
@@ -184,8 +184,8 @@ for i in range(0,neuronrows):
 			tmp_j = top_left_j + (bdx%BLOCK_SIZE)
 			#print(tmp_i,tmp_j,top_left_i,top_left_j)
 			if (tmp_i >= 0 and tmp_i < neuronrows) and (tmp_j >= 0 and tmp_j < neuroncols) and (tmp_i == i or tmp_j == j):
-				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 0.05, tau = 4, sign = -1)
-				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = 1, tau = 8)
+				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 1, tau = 4, sign = -1)
+				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = -.1, tau = 8)
 		new_neuron = NeuronG(pos = oncoffs[i][j].pos , scale = scale, custom_color = custom_color)
 
 	line_detectors.append(row)
