@@ -109,8 +109,6 @@ neuronrows = nneurons
 spacing = 29.5
 scalefactor = 0.8
 scale = 20/(nsize/float(spacing))*scalefactor
-print(scale)
-print(14.5/20)
 
 # photoreceptive layer
 for i in range(0, neuronrows):
@@ -277,6 +275,9 @@ while not done:
 		update_grid_neurons(oncoffs)
 		update_grid_neurons(offcons)
 		update_grid_neurons(line_detectors)
+		
+		print(line_detectors[14][14].get_firing_rate())
+		
 		nclock.tick()
 		
 		mylabel.anim_update()

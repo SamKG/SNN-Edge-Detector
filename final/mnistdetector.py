@@ -147,7 +147,7 @@ for i in range(0, neuronrows):
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
 				# Off surround
 				newoncoffs.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=-1)
+									w_init = 0.3, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
 									w_init = 0.1, sign=1)				
@@ -156,7 +156,7 @@ for i in range(0, neuronrows):
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
 				# Off surround
 				newoncoffs.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=-1)
+									w_init = 0.3, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
 									w_init = 0.1, sign=1)
@@ -280,9 +280,11 @@ while not done:
 		update_grid_neurons(line_detectors)
 		nclock.tick()
 		
-		mylabel.anim_update()
-		
 	fc += 1
+	
+	print(line_detectors[14][14].get_firing_rate())
+	
+	mylabel.anim_update()
 	
 	if record:
 		pygame.image.save(screen, 
