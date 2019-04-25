@@ -3,7 +3,8 @@ from brian2tools import *
 
 REFRACTORY_TIME = 0*ms
 INTEG_METHOD = 'euler'
-D_T = 1*ms
+D_T = .1*ms # set this for default timestep
+defaultclock.dt = D_T
 
 NEURON_ROW_SIZE = 28
 NUM_NEURONS = NEURON_ROW_SIZE*NEURON_ROW_SIZE

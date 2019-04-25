@@ -13,14 +13,7 @@ oncenter_ganglion = Synapses(OnCenterOffSurround,GanglionLayer,model=syn_eqs,on_
 offcenter_ganglion = Synapses(OffCenterOnSurround,GanglionLayer,model=syn_eqs_2,on_pre=syn_on_pre)
 
 ### DEFINE NETWORK ###
-NETWORK = Network([InputLayer,
-OnCenterOffSurround,
-OffCenterOnSurround,
-GanglionLayer,
-input_oncenter,
-input_offcenter,
-oncenter_ganglion,
-offcenter_ganglion])
+NETWORK = Network(collect())
 
 
 ### ONCENTER LAYER ####
@@ -124,5 +117,6 @@ else:
         NETWORK.store('three','stored_states/three.state')
 print('THREE LOADED')
 
+print("RUNNING NETWORK WITH DT",defaultclock.dt)
 
-NETWORK.run(1*second)
+NETWORK.run(2*second)
