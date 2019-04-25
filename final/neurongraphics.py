@@ -8,6 +8,7 @@ class NeuronG(Neuron):
 		self.scale = scale
 		val = int(self.v / self.threshold)
 		self.custom_color = kwargs.get('custom_color', None)
+		self.color_by_rate = kwargs.get('color_by_rate', False)
 		if self.custom_color is None:
 			self.color = (val,0,255-val)
 		else:
@@ -15,16 +16,17 @@ class NeuronG(Neuron):
 	
 	def update(self, dt, I_inj = 0, learn = False):
 		vout = super().update(dt, I_inj, learn)
-		val = int(vout / self.threshold * 255)
-		if(val < 0):
-			val = 0
-		if(val == 255):
-			self.color = (255, 255, 0)
-		else:
-			if self.custom_color is None:
-				self.color = (val,0,255-val)
+		if not self.color_by_rate:
+			val = int(vout / self.threshold * 255)
+			if(val < 0):
+				val = 0
+			if(val == 255):
+				self.color = (255, 255, 0)
 			else:
-				self.color = self.custom_color(val)
+				if self.custom_color is None:
+					self.color = (val,0,255-val)
+				else:
+					self.color = self.custom_color(val)
 		return vout
 	
 	def draw_synapses(self, screen):
