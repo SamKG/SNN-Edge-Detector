@@ -1,6 +1,6 @@
 from brian2 import *
 from brian2tools import *
-
+set_device('cpp_standalone')
 REFRACTORY_TIME = 0*ms
 INTEG_METHOD = 'euler'
 D_T = 1*ms
