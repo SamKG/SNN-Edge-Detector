@@ -14,13 +14,18 @@ R = 1*ohm
 C = 1*farad
 q = 1
 eqs = '''
-dv/dt = -(v-I)/tau : volt (unless refractory)
+dv/dt = -(v-(I1 + I2))/tau : volt (unless refractory)
 da/dt = -1/tau * a : 1
-I : volt
+I1 : volt
+I2 : volt
 '''
 
 syn_eqs = '''
 w:1 
-I_post = w*(a_pre) : volt(summed)
+I1_post = w*(a_pre) : volt(summed)
+'''
+syn_eqs_2 = '''
+w:1 
+I2_post = w*(a_pre) : volt(summed)
 '''
 syn_on_pre = 'a+=1'

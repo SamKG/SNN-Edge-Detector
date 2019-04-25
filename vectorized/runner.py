@@ -3,11 +3,14 @@ from bipolar_layer import *
 from ganglion_layer import *
 from parameters import *
 from pathlib import Path
+
+IS_STANDALONE = False
+#set_device('cpp_standalone')
 prefs.codegen.target = 'cython'  # use the Python fallback
-input_oncenter = Synapses(InputLayer,OnCenterOffSurround,model=syn_eqs)
-input_offcenter = Synapses(InputLayer,OffCenterOnSurround,model=syn_eqs)
-oncenter_ganglion = Synapses(OnCenterOffSurround,GanglionLayer,model=syn_eqs)
-offcenter_ganglion = Synapses(OffCenterOnSurround,GanglionLayer,model=syn_eqs)
+input_oncenter = Synapses(InputLayer,OnCenterOffSurround,model=syn_eqs,on_pre=syn_on_pre)
+input_offcenter = Synapses(InputLayer,OffCenterOnSurround,model=syn_eqs,on_pre=syn_on_pre)
+oncenter_ganglion = Synapses(OnCenterOffSurround,GanglionLayer,model=syn_eqs,on_pre=syn_on_pre)
+offcenter_ganglion = Synapses(OffCenterOnSurround,GanglionLayer,model=syn_eqs_2,on_pre=syn_on_pre)
 
 ### DEFINE NETWORK ###
 NETWORK = Network([InputLayer,
@@ -21,7 +24,7 @@ offcenter_ganglion])
 
 
 ### ONCENTER LAYER ####
-if (Path('stored_states/one.state').is_file()):
+if (Path('stored_states/one.state').is_file() and not IS_STANDALONE):
     print('LOADING ONE FROM FILE')
     NETWORK.restore('one','stored_states/one.state')
 else:
@@ -47,13 +50,14 @@ else:
                         input_oncenter.w[tmp_indx:curr_indx] = W_EXCIT # if is center, then it is excitatory
                     else:
                         input_oncenter.w[tmp_indx:curr_indx] = W_INHIB # if is surround, then it is inhibitory
-    NETWORK.store('one','stored_states/one.state')
+    if not IS_STANDALONE:
+        NETWORK.store('one','stored_states/one.state')
 print('ONE LOADED')
 
 
 
 ### OFFCENTER LAYER ####
-if (Path('stored_states/two.state').is_file()):
+if (Path('stored_states/two.state').is_file() and not IS_STANDALONE):
     print('LOADING TWO FROM FILE')
     NETWORK.restore('two','stored_states/two.state')
 else:
@@ -79,12 +83,13 @@ else:
                         input_offcenter.w[tmp_indx:curr_indx] = W_INHIB # if is center, then it is inhibitory
                     else:
                         input_offcenter.w[tmp_indx:curr_indx] = W_EXCIT # if is surround, then it is excitatory
-    NETWORK.store('two','stored_states/two.state')
+    if not IS_STANDALONE:
+        NETWORK.store('two','stored_states/two.state')
 print('TWO LOADED')
 
 
 ### GANGLION LAYER ###
-if (Path('stored_states/three.state').is_file()):
+if (Path('stored_states/three.state').is_file() and not IS_STANDALONE):
     print('LOADING THREE FROM FILE')
     NETWORK.restore('three','stored_states/three.state')
 else:
@@ -115,7 +120,9 @@ else:
                         offcenter_ganglion.w[tmp_indx:curr_indx] = W_INHIB # if is surround, then it is inhibitory
                     else:
                         offcenter_ganglion.w[tmp_indx:curr_indx] = W_EXCIT # if is center, then it is excitatory
-    NETWORK.store('three','stored_states/three.state')
+    if not IS_STANDALONE:
+        NETWORK.store('three','stored_states/three.state')
 print('THREE LOADED')
 
 
+NETWORK.run(1*second)
