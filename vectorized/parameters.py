@@ -1,7 +1,12 @@
 from brian2 import *
 from brian2tools import *
 
-NUM_NEURONS = 28*28
+REFRACTORY_TIME = 0*ms
+INTEG_METHOD = 'euler'
+D_T = 1*ms
+
+NEURON_ROW_SIZE = 28
+NUM_NEURONS = NEURON_ROW_SIZE*NEURON_ROW_SIZE
 RECEPTIVE_FIELD = 3
 BLOCK_SIZE = 3
 tau = 10*ms
@@ -16,6 +21,6 @@ I : volt
 
 syn_eqs = '''
 w:1 
-I_post = w*(a_pre) (summed)
+I_post = w*(a_pre) : volt(summed)
 '''
 syn_on_pre = 'a+=1'
