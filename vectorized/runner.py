@@ -3,14 +3,13 @@ from bipolar_layer import *
 from ganglion_layer import *
 from parameters import *
 from pathlib import Path
-
+prefs.codegen.target = 'cython'  # use the Python fallback
 input_oncenter = Synapses(InputLayer,OnCenterOffSurround,model=syn_eqs)
 input_offcenter = Synapses(InputLayer,OffCenterOnSurround,model=syn_eqs)
 oncenter_ganglion = Synapses(OnCenterOffSurround,GanglionLayer,model=syn_eqs)
 offcenter_ganglion = Synapses(OffCenterOnSurround,GanglionLayer,model=syn_eqs)
 
-
-
+### DEFINE NETWORK ###
 NETWORK = Network([InputLayer,
 OnCenterOffSurround,
 OffCenterOnSurround,
