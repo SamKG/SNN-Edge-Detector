@@ -184,7 +184,7 @@ for i in range(0,neuronrows):
 		pos1 = np.array(oncoffs[i][j].pos)
 		pos2 = np.array(oncoffs[top_i][left_j].pos)
 		## This neuron will detect vertical and horizontal lines
-		vert_horiz = NeuronG(pos = pos1 + (pos2 - pos1)/2, scale = scale, custom_color = custom_color)
+		vert_horiz = NeuronG(pos = pos1 + (pos2 - pos1)/3, scale = scale, custom_color = custom_color)
 		row_vh.append(vert_horiz)
 		row.append(vert_horiz)
 		if(left_j >= 0 and right_j < neuroncols):
@@ -205,6 +205,9 @@ for i in range(0,neuronrows):
 	line_detectors.append(row)
 	line_detectors_vh.append(row_vh)
 	line_detectors_d.append(row_d)
+
+#Output back to a modified photoreceptive layer
+
 
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
