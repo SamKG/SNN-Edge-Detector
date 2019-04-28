@@ -19,7 +19,7 @@ class Label:
 	def __init__(self, init_idx=0):
 		self.font = pygame.font.SysFont("Segoe UI", 65)
 		self.labels = {0:"Photoreceptors", 1:"Off-Center-On-Surround",
-					2:"On-Center-Off-Surround", 3:"Ganglion"}
+					2:"On-Center-Off-Surround", 3:"Ganglion", 4:"Ganglion Vert/Horiz", 5:"Ganglion Diags"}
 		self.anim_dur = 0
 		self.anim_curr = 0
 		self.currlabel = self.font.render(self.labels[init_idx], True, WHITE)
@@ -71,7 +71,7 @@ try:
 	os.makedirs(record_dir)
 except FileExistsError:
 	videofiles = [f for f in os.listdir(record_dir)
-					if os.path.isfile(os.path.join(record_dir, f))]
+					if (os.path.isfile(os.path.join(record_dir, f)) and f != ".gitignore")]
 	if not (not videofiles):
 		vfnums = [int(os.path.splitext(vf)[0]) for vf in videofiles]
 		curr_recording_idx = max(vfnums)+1
@@ -132,7 +132,7 @@ for i in range(0, neuronrows):
 		offconsrow.append(newoffcons)
 		# On center
 		newoncoffs.add_syn(neurongrid[i][j],
-								w_init = 1, tau = 2, sign=1)
+								w_init = 1, tau = 1, sign=1)
 		# Off center
 		newoffcons.add_syn(neurongrid[i][j],
 							w_init = 1, tau = 1, sign=-1)
@@ -145,19 +145,19 @@ for i in range(0, neuronrows):
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
 				# Off surround
 				newoncoffs.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=-1)
+									w_init = 0.1, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=1)				
+									w_init = 0.02, sign=1)				
 			curr_i = int(rotation_2.imag) + i
 			curr_j = int(rotation_2.real) + j
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
 				# Off surround
 				newoncoffs.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=-1)
+									w_init = 0.1, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.2, sign=1)
+									w_init = 0.02, sign=1)
 				rotation_1 *= 1j
 				rotation_2 *= 1j
 			
@@ -170,21 +170,41 @@ BLOCK_SIZE = 3
 # Line detecting ganglion cells
 # each neuron is responsible for detecting its own 3x3 block of on-center off-surround cells surrounding the neuron
 line_detectors = []
+line_detectors_vh = []
+line_detectors_d = []
 for i in range(0,neuronrows):
 	row = []
+	row_vh = []
+	row_d = []
 	for j in range(0,neuroncols):
-		new_neuron = NeuronG(pos = oncoffs[i][j].pos , scale = scale, custom_color = custom_color)
-		row.append(new_neuron)
-		top_left_i = i - BLOCK_SIZE//2
-		top_left_j = j - BLOCK_SIZE//2
-		for bdx in range(0,BLOCK_SIZE*BLOCK_SIZE):
-			tmp_i = top_left_i + bdx//BLOCK_SIZE
-			tmp_j = top_left_j + (bdx%BLOCK_SIZE)
-			#print(tmp_i,tmp_j,top_left_i,top_left_j)
-			if (tmp_i >= 0 and tmp_i < neuronrows) and (tmp_j >= 0 and tmp_j < neuroncols):
-				new_neuron.add_syn(oncoffs[tmp_i][tmp_j], winit = 0.05, tau = 4, sign = -1)
-				new_neuron.add_syn(offcons[tmp_i][tmp_j], winit = 1, tau = 8)
+		top_i = i - BLOCK_SIZE//2
+		bottom_i = i + BLOCK_SIZE//2
+		left_j = j - BLOCK_SIZE//2
+		right_j = j + BLOCK_SIZE//2
+		pos1 = np.array(oncoffs[i][j].pos)
+		pos2 = np.array(oncoffs[top_i][left_j].pos)
+		## This neuron will detect vertical and horizontal lines
+		vert_horiz = NeuronG(pos = pos1 + (pos2 - pos1)/2, scale = scale, custom_color = custom_color)
+		row_vh.append(vert_horiz)
+		row.append(vert_horiz)
+		if(left_j >= 0 and right_j < neuroncols):
+			for tmp_j in range(left_j, right_j+1):
+				vert_horiz.add_syn(offcons[i][tmp_j], winit = 0.3, tau = 4)
+		if(top_i >= 0 and bottom_i < neuronrows):
+			for tmp_i in range(top_i, bottom_i+1):
+				vert_horiz.add_syn(offcons[tmp_i][j], winit = 1, tau = 4)
+		if(top_i >= 0 and bottom_i < neuronrows and left_j >= 0 and right_j < neuroncols):
+			## This neuron will detect diagonal lines
+			diags = NeuronG(pos = pos1 + (pos1 - pos2)/2, scale = scale, custom_color = custom_color)
+			row.append(diags)
+			row_d.append(diags)
+			for tmp in range(-(BLOCK_SIZE//2), BLOCK_SIZE//2+1):
+				diags.add_syn(offcons[i + tmp][j + tmp], winit = 0.3, tau = 4)
+				diags.add_syn(offcons[i - tmp][j + tmp], winit = 1, tau = 4)
+
 	line_detectors.append(row)
+	line_detectors_vh.append(row_vh)
+	line_detectors_d.append(row_d)
 
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
@@ -196,10 +216,10 @@ def draw_grid_synapses(neurongrid):
 		for neuron in nrow:
 			neuron.draw_synapses(screen)
 
-def update_grid_neurons(neurongrid):
+def update_grid_neurons(neurongrid, I_inj = 0):
 	for nrow in neurongrid:
 		for neuron in nrow:
-			neuron.update(nclock.dt)
+			neuron.update(nclock.dt, I_inj = I_inj)
 
 draw_type = 0
 record = False
@@ -213,6 +233,8 @@ labelanimlen = 300
 mylabel.update_label(draw_type)
 mylabel.anim_start(labelanimlen)
 
+num_layers = 6
+
 while not done:
 	pressed = False
 	for event in pygame.event.get():
@@ -220,12 +242,12 @@ while not done:
 			done = True
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_SPACE:
-				draw_type = (draw_type+1)%4
+				draw_type = (draw_type+1)%num_layers
 				mylabel.update_label(draw_type)
 				mylabel.anim_start(labelanimlen)
 				mylabelpos = [size[0]/2-mylabel.currlabel.get_size()[0]/2,50]
 			if event.key == pygame.K_BACKSPACE:
-				draw_type = (draw_type-1)%4
+				draw_type = (draw_type-1)%num_layers
 				mylabel.update_label(draw_type)
 				mylabel.anim_start(labelanimlen)
 				mylabelpos = [size[0]/2-mylabel.currlabel.get_size()[0]/2,50]
@@ -261,6 +283,16 @@ while not done:
 			draw_grid_synapses(line_detectors)
 			draw_grid_neurons(line_detectors)
 			mylabel.draw(screen, mylabelpos)
+		
+		if draw_type == 4:
+			draw_grid_synapses(line_detectors_vh)
+			draw_grid_neurons(line_detectors_vh)
+			mylabel.draw(screen, mylabelpos)
+		
+		if draw_type == 5:
+			draw_grid_synapses(line_detectors_d)
+			draw_grid_neurons(line_detectors_d)
+			mylabel.draw(screen, mylabelpos)
 	
 	this_time = 0
 	while this_time < newtimestep:
@@ -271,18 +303,18 @@ while not done:
 		for i in range(0, neuronrows):
 			for j in range(0, neuroncols):
 				neurongrid[i][j].update(nclock.dt, I_inj = 20*currimg[i][j])
-		
-		update_grid_neurons(oncoffs)
-		update_grid_neurons(offcons)
+		update_grid_neurons(oncoffs, I_inj = 0.5)
+		update_grid_neurons(offcons, I_inj = 0.5)
 		update_grid_neurons(line_detectors)
-		
-		print(line_detectors[14][14].get_firing_rate())
-		
 		nclock.tick()
-		
-		mylabel.anim_update()
+	
+	line_detectors_d[14][14].color = (255,255,255)
+	for synapse in line_detectors_d[14][14].syns:
+		synapse.n_pre.color = (255,255,255)
 		
 	fc += 1
+	
+	mylabel.anim_update()
 	
 	if record:
 		pygame.image.save(screen, 
