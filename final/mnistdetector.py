@@ -183,7 +183,7 @@ for i in range(0,neuronrows):
 		right_j = j + BLOCK_SIZE//2
 		pos1 = np.array(oncoffs[i][j].pos)
 		pos2 = np.array(oncoffs[top_i][left_j].pos)
-		## This neuron will detect vertical and horizontal lines
+		# This neuron will detect vertical and horizontal lines
 		vert_horiz = NeuronG(pos = pos1 + (pos2 - pos1)/4, scale = scale, custom_color = custom_color)
 		row_vh.append(vert_horiz)
 		row.append(vert_horiz)
@@ -194,32 +194,39 @@ for i in range(0,neuronrows):
 			for tmp_i in range(top_i, bottom_i+1):
 				vert_horiz.add_syn(offcons[tmp_i][j], winit = 1, tau = 4)
 		if(top_i >= 0 and bottom_i < neuronrows and left_j >= 0 and right_j < neuroncols):
-			## This neuron will detect diagonal lines
+			# This neuron will detect diagonal lines
 			diags = NeuronG(pos = pos1 + (pos1 - pos2)/2, scale = scale, custom_color = custom_color)
 			row.append(diags)
 			row_d.append(diags)
 			for tmp in range(-(BLOCK_SIZE//2), BLOCK_SIZE//2+1):
 				diags.add_syn(offcons[i + tmp][j + tmp], winit = 0.3, tau = 4)
 				diags.add_syn(offcons[i - tmp][j + tmp], winit = 1, tau = 4)
+		else:
+			row_d.append(None)
 
 	line_detectors.append(row)
 	line_detectors_vh.append(row_vh)
 	line_detectors_d.append(row_d)
 
+# Mapping back to the photoreceptive layer
+
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
 		for neuron in nrow:
-			neuron.draw_neuron(screen)
+			if neuron != None:
+				neuron.draw_neuron(screen)
 
 def draw_grid_synapses(neurongrid):
 	for nrow in neurongrid:
 		for neuron in nrow:
-			neuron.draw_synapses(screen)
+			if neuron != None:
+				neuron.draw_synapses(screen)
 
 def update_grid_neurons(neurongrid, I_inj = 0):
 	for nrow in neurongrid:
 		for neuron in nrow:
-			neuron.update(nclock.dt, I_inj = I_inj)
+			if neuron != None:
+				neuron.update(nclock.dt, I_inj = I_inj)
 
 draw_type = 0
 record = False
