@@ -19,7 +19,7 @@ class Label:
 	def __init__(self, init_idx=0):
 		self.font = pygame.font.SysFont("Segoe UI", 65)
 		self.labels = {0:"Photoreceptors", 1:"Off-Center-On-Surround",
-					2:"On-Center-Off-Surround", 3:"Ganglion", 4:"Ganglion Vert/Horiz", 5:"Ganglion Diags"}
+					2:"On-Center-Off-Surround", 3:"Ganglion", 4:"Ganglion Vertical", 5:"Ganglion Horizontal", 6:"Ganglion Diag LR", 7:"Ganglion Diag RL"}
 		self.anim_dur = 0
 		self.anim_curr = 0
 		self.currlabel = self.font.render(self.labels[init_idx], True, WHITE)
@@ -187,7 +187,8 @@ for i in range(0,neuronrows):
 		right_j = j + BLOCK_SIZE//2
 		pos1 = np.array(oncoffs[i][j].pos)
 		pos2 = np.array(oncoffs[top_i][left_j].pos)
-<<<<<<< HEAD
+
+		'''
 		# This neuron will detect vertical and horizontal lines
 		vert_horiz = NeuronG(pos = pos1 + (pos2 - pos1)/4, scale = scale, custom_color = custom_color)
 		row_vh.append(vert_horiz)
@@ -208,12 +209,13 @@ for i in range(0,neuronrows):
 				diags.add_syn(offcons[i - tmp][j + tmp], winit = 1, tau = 4)
 		else:
 			row_d.append(None)
-=======
+		'''
+
 		## Initialize neurons (one for every orientation)
-		vert = NeuronG(pos = pos1 + (pos2 - pos1)/1,scale = scale,custom_color = custom_color)
+		vert = NeuronG(pos = pos1 + (pos2 - pos1)/4,scale = scale,custom_color = custom_color)
 		horz = NeuronG(pos = pos1 + (pos2 - pos1)/2,scale = scale,custom_color = custom_color)
-		diag_lr = NeuronG(pos = pos1 + (pos2 - pos1)/4,scale = scale,custom_color = custom_color)
-		diag_rl = NeuronG(pos = pos1 + (pos2 - pos1)/6,scale = scale,custom_color = custom_color)
+		diag_lr = NeuronG(pos = pos1 + (pos1 - pos2)/2,scale = scale,custom_color = custom_color)
+		diag_rl = NeuronG(pos = pos1 + (pos1 - pos2)/4,scale = scale,custom_color = custom_color)
 
 		## Add synapses
 		# 1) vertical line detector
@@ -223,11 +225,11 @@ for i in range(0,neuronrows):
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if tmp_j == j:
 					# we lie on vertical line
-					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=1,w_init=1) #excite with on
-					vert.add_syn(offcons[tmp_i][tmp_j],tau=1,w_init=-1) #inhibit off
+					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=1) #excite with on
+					vert.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-1) #inhibit off
 				else:
-					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=1,w_init=-1) #inhibit when on
-					vert.add_syn(offcons[tmp_i][tmp_j],tau=1,w_init=1) #excite when off
+					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=-1) #inhibit when on
+					vert.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=1) #excite when off
 		
 		# 2) Horizontal line detector
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
@@ -236,11 +238,11 @@ for i in range(0,neuronrows):
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if tmp_i == i:
 					# we lie on horizontal line
-					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=1,w_init=1) #excite with on
-					horz.add_syn(offcons[tmp_i][tmp_j],tau=1,w_init=-1) #inhibit off
+					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=1) #excite with on
+					horz.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-1) #inhibit off
 				else:
-					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=1,w_init=-1) #inhibit when on
-					horz.add_syn(offcons[tmp_i][tmp_j],tau=1,w_init=1) #excite when off
+					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=-1) #inhibit when on
+					horz.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=1) #excite when off
 		
 		# 3) Diagonal from left to right
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
@@ -249,11 +251,11 @@ for i in range(0,neuronrows):
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if abs(top_i - tmp_i) == abs(left_j - tmp_j):
 					# we lie on l-r diagonal (if distance to topleft corner is same in both x and y)
-					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=1,w_init=1) #excite with on
-					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=1,w_init=-1) #inhibit off
+					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=1) #excite with on
+					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-1) #inhibit off
 				else:
-					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=1,w_init=-1) #inhibit when on
-					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=1,w_init=1) #excite when off
+					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=-1) #inhibit when on
+					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=1) #excite when off
 
 		# 4) Diagonal from right to left
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
@@ -276,7 +278,6 @@ for i in range(0,neuronrows):
 		verts.append(vert)
 		diags_lr.append(diag_lr)
 		diags_rl.append(diag_rl)
->>>>>>> 6a6624626c346bd8b37e23d50e2810304a97943f
 
 	line_detectors.append(row)
 	line_detectors_h.append(horzs)
@@ -396,8 +397,8 @@ while not done:
 		for i in range(0, neuronrows):
 			for j in range(0, neuroncols):
 				neurongrid[i][j].update(nclock.dt, I_inj = 20*currimg[i][j])
-		update_grid_neurons(oncoffs, I_inj = 0.5)
-		update_grid_neurons(offcons, I_inj = 0.5)
+		update_grid_neurons(oncoffs, I_inj = 1)
+		update_grid_neurons(offcons, I_inj = 1)
 		update_grid_neurons(line_detectors)
 		nclock.tick()
 	
