@@ -145,35 +145,45 @@ class Neuron:
 			return self.v
 
 class SynapseReader:
-	def __init__(self, synapse):
+	def __init__(self, synapse, fix_length = -1):
 		self.synapse = synapse
+		self.fix_length = fix_length
+		self.times = []
 		self.Is = []
 		self.ws = []
 		
 	def read_synapse(self, nclock):
-		self.Is.append((nclock.gettime, self.synapse.I))
-		self.ws.append((nclock.gettime, self.synapse.w))
+		self.times.append(nclock.get_time())
+		self.Is.append(self.synapse.I)
+		self.ws.append(self.synapse.w)
+
+		if self.fix_length > 0 and len(self.times) >= self.fix_length:
+			self.times = self.times[-self.fix_length:]
+			self.Is = self.Is[-self.fix_length:]
+			self.ws = self.ws[-self.fix_length:]
 		
 	def refresh(self):
 		self.Is = []
 		self.ws = []
 			
 class NeuronReader:
-	def __init__(self, neuron, readsyns = False):
+	def __init__(self, neuron, readsyns = False, fix_length = -1):
 		self.neuron = neuron
 		self.readsyns = readsyns
 		if self.readsyns:
 			self.syns = self.neuron.syns
-			self.synreaders = [SynapseReader(syn) for syn in self.neuron.syns]
+			self.synreaders = [SynapseReader(syn, fix_length) for syn in self.neuron.syns]
+		self.fix_length = fix_length
+		self.times = []
 		self.vs = []
 		self.spikes = []
 		
-	def change_neuron(self):
+	def change_neuron(self, neuron, readsyns = False):
 		self.neuron = neuron
+		self.times = []
 		self.vs = []
 		self.spikes = []
 		if self.readsyns:
-			self.syns = self.neuron.syns
 			self.synreaders = [SynapseReader(syn) for syn in self.neuron.syns]
 			
 	def update_synapses(self):
@@ -185,13 +195,19 @@ class NeuronReader:
 	def refresh(self):
 		self.vs = []
 		self.spikes = []
+		self.times = []
 		if self.readsyns:
 			for synreader in self.synreaders:
 				synreader.refresh()
 				
 	def read_neuron(self, nclock):
-		self.vs.append((nclock.gettime, self.neuron.v))
-		self.spikes.append((nclock.gettime, self.neuron.currspike))
-		if readsyns:
+		self.times.append(nclock.get_time())
+		self.vs.append(self.neuron.v)
+		self.spikes.append(self.neuron.currspike)
+		if self.fix_length > 0 and len(self.vs) >= self.fix_length:
+			self.times = self.times[-self.fix_length:]
+			self.vs = self.vs[-self.fix_length:]
+			self.spikes = self.spikes[-self.fix_length:]
+		if self.readsyns:
 			for synreader in self.synreaders:
 				synreader.read_synapse(nclock)
