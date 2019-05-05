@@ -296,7 +296,7 @@ labelanimlen = 300
 mylabel.update_label(draw_type)
 mylabel.anim_start(labelanimlen)
 
-nr = NeuronReader(oncoffs[10][10], fix_length = 20)
+nr = NeuronReader(neurongrid[14][9], fix_length = 40)
 dp = DynamicPlot([10,10], 400, 200, nr, 'spikes')
 
 num_layers = 8
