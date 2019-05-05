@@ -6,7 +6,9 @@ import numpy as np
 import random
 import timemodule
 from neurongraphics import NeuronG
+from neuron import *
 import mnist_loader
+from dataplotter import DynamicPlot
 
 # Color constant for black
 BLACK = (0,0,0)
@@ -188,29 +190,6 @@ for i in range(0,neuronrows):
 		pos1 = np.array(oncoffs[i][j].pos)
 		pos2 = np.array(oncoffs[top_i][left_j].pos)
 
-		'''
-		# This neuron will detect vertical and horizontal lines
-		vert_horiz = NeuronG(pos = pos1 + (pos2 - pos1)/4, scale = scale, custom_color = custom_color)
-		row_vh.append(vert_horiz)
-		row.append(vert_horiz)
-		if(left_j >= 0 and right_j < neuroncols):
-			for tmp_j in range(left_j, right_j+1):
-				vert_horiz.add_syn(offcons[i][tmp_j], winit = 0.3, tau = 4)
-		if(top_i >= 0 and bottom_i < neuronrows):
-			for tmp_i in range(top_i, bottom_i+1):
-				vert_horiz.add_syn(offcons[tmp_i][j], winit = 1, tau = 4)
-		if(top_i >= 0 and bottom_i < neuronrows and left_j >= 0 and right_j < neuroncols):
-			# This neuron will detect diagonal lines
-			diags = NeuronG(pos = pos1 + (pos1 - pos2)/2, scale = scale, custom_color = custom_color)
-			row.append(diags)
-			row_d.append(diags)
-			for tmp in range(-(BLOCK_SIZE//2), BLOCK_SIZE//2+1):
-				diags.add_syn(offcons[i + tmp][j + tmp], winit = 0.3, tau = 4)
-				diags.add_syn(offcons[i - tmp][j + tmp], winit = 1, tau = 4)
-		else:
-			row_d.append(None)
-		'''
-
 		## Initialize neurons (one for every orientation)
 		vert = NeuronG(pos = pos1 + (pos2 - pos1)/4,scale = scale,custom_color = custom_color)
 		horz = NeuronG(pos = pos1 + (pos2 - pos1)/2,scale = scale,custom_color = custom_color)
@@ -317,6 +296,9 @@ labelanimlen = 300
 mylabel.update_label(draw_type)
 mylabel.anim_start(labelanimlen)
 
+nr = NeuronReader(oncoffs[10][10], fix_length = 20)
+dp = DynamicPlot([10,10], 400, 200, nr, 'voltage')
+
 num_layers = 8
 
 while not done:
@@ -388,6 +370,8 @@ while not done:
 			draw_grid_neurons(line_detectors_drl)
 			mylabel.draw(screen, mylabelpos)
 	
+	dp.draw(screen)
+	
 	this_time = 0
 	while this_time < newtimestep:
 		this_time += dt
@@ -400,6 +384,7 @@ while not done:
 		update_grid_neurons(oncoffs, I_inj = 1)
 		update_grid_neurons(offcons, I_inj = 1)
 		update_grid_neurons(line_detectors)
+		nr.read_neuron(nclock)
 		nclock.tick()
 	
 #	line_detectors_d[14][14].color = (255,255,255)
