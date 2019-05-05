@@ -52,13 +52,16 @@ class DynamicPlot(Frame):
 		ratio_x = self.scale_x/screen.get_width();
 		ratio_y = self.scale_y/screen.get_height();
 		
+		x_axis_y = int(self.pos[1] + self.scale_y - pad*ratio_y)
+		y_axis_x = int(self.pos[0] + pad*ratio_x)
+		
 		# Draw the x axis
-		pygame.draw.aaline(screen, (0, 0, 0), (int(self.pos[0] + pad*ratio_x), int(self.pos[1] + self.scale_y/2 + pad*ratio_y)),
-								(int(self.pos[0] + self.scale_x - pad*ratio_x), int(self.pos[1] + self.scale_y/2 + pad*ratio_y)))
+		pygame.draw.aaline(screen, (0, 0, 0), (int(self.pos[0] + pad*ratio_x), x_axis_y),
+								(int(self.pos[0] + self.scale_x - pad*ratio_x), x_axis_y))
 		
 		# Draw the y axis
-		pygame.draw.aaline(screen, (0, 0, 0), (int(self.pos[0] + pad*ratio_x), int(self.pos[1] + pad*ratio_y)),
-								(int(self.pos[0] + pad*ratio_x), int(self.pos[1] + self.scale_y - pad*ratio_y)))
+		pygame.draw.aaline(screen, (0, 0, 0), (y_axis_x, int(self.pos[1] + pad*ratio_y)),
+								(y_axis_x, int(self.pos[1] + self.scale_y - pad*ratio_y)))
 		
 		x_ax = self.x_axis()
 		y_ax = self.y_axis()
@@ -68,17 +71,21 @@ class DynamicPlot(Frame):
 		num_ys = len(y_ax)
 		
 		if num_xs > 0 and num_ys > 0:
-			x_ax_extents = [min(x_ax),max(x_ax)]
-			y_ax_extents = [min(y_ax),max(y_ax)]
-			
+		
 			def normalize(value, extents):
+				if extents[0] == extents[1]:
+					return 1
 				return (value - extents[0])/(extents[1]-extents[0])
+				
+			x_ax_extents = [min(x_ax),max(x_ax)]
+			
+			if self.var_interest != 'spikes':
+				y_ax_extents = [min(y_ax),max(y_ax)]
+			else:
+				y_ax_extents = [0,1]
 			
 			x_ax_plot = [normalize(x, x_ax_extents)*(self.scale_x - 2*pad*ratio_x) for x in x_ax]
-			y_ax_plot = [normalize(y, y_ax_extents)*(self.scale_y - 4*pad*ratio_y) for y in y_ax]
-			
-			x_axis_y = int(self.pos[1] + self.scale_y/2 + pad*ratio_y)
-			y_axis_x = int(self.pos[0] + pad*ratio_x)
+			y_ax_plot = [normalize(y, y_ax_extents)*(self.scale_y - 2*pad*ratio_y) for y in y_ax]
 			
 			dtick_x = (self.scale_x - 2*pad*ratio_x)/num_xs
 			dtick_y = (self.scale_y - 2*pad*ratio_y)/num_ys
@@ -95,10 +102,10 @@ class DynamicPlot(Frame):
 				pygame.draw.aaline(screen, (0,0,0),  tick_x_extents[0], tick_x_extents[1])
 				pygame.draw.aaline(screen, (0,0,0),  tick_y_extents[0], tick_y_extents[1])
 				
-				if(self.var_interest == 'spikes'):
-					pygame.draw.aaline(screen, (0,0,0), (x_ax_plot[i] + self.pos[0], x_axis_y,
+				if self.var_interest == 'spikes':
+					pygame.draw.aaline(screen, (0,0,0), (x_ax_plot[i] + self.pos[0], x_axis_y),
 										(x_ax_plot[i] + self.pos[0], y_ax_plot[i] + self.pos[1]))
-				if i < num_xs-1:
+				elif i < num_xs-1:
 					pygame.draw.aaline(screen, (0,0,0), (x_ax_plot[i] + self.pos[0], y_ax_plot[i] + self.pos[1]),
 										(x_ax_plot[i+1] + self.pos[0], y_ax_plot[i+1] + self.pos[1]))
 
