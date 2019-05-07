@@ -1,10 +1,11 @@
 import pygame
 from neuron import Neuron
+import numpy as np
 
 class NeuronG(Neuron):
 	def __init__(self, pos, v_r = 0, R_m = 1, tau = 1, threshold = 0.2, scale = 1, **kwargs):
 		super().__init__(v_r, R_m, tau, threshold, **kwargs)
-		self.pos = pos
+		self.pos = np.array(pos)
 		self.scale = scale
 		self.unit_scale = 20
 		val = int(self.v / self.threshold)
@@ -14,6 +15,17 @@ class NeuronG(Neuron):
 			self.color = (val,0,255-val)
 		else:
 			self.color = self.custom_color(val)
+	
+	def get_val(self):
+		if not self.color_by_rate:
+			val = int(vout / self.threshold * 255)
+		else:
+			val = int(self.firing_rate * 20 * 255)
+		if(val < 0):
+			val = 0
+		elif(val > 255):
+			val = 255
+		return val
 	
 	def update(self, dt, I_inj = 0, learn = False):
 		vout = super().update(dt, I_inj, learn)
