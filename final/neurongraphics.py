@@ -35,7 +35,9 @@ class NeuronG(Neuron):
 			synval = syn.I
 			if synval > maxI:
 				synval = maxI
-			val = int(syn.I / maxI * 255)
+			elif synval < 0:
+				synval = 0
+			val = int(synval / maxI * 255)
 			color = (val,0,255-val)
 			pygame.draw.aaline(screen, color, (int(syn.n_pre.pos[0]), int(syn.n_pre.pos[1])),
 								(int(syn.n_post.pos[0]), int(syn.n_post.pos[1])))
