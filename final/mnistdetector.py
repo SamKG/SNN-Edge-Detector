@@ -10,6 +10,8 @@ from neurontopixel import *
 import mnist_loader
 from dataplotter import DynamicPlot
 import numpy as np
+import threading
+from cython.parallel import prange, parallel
 
 # Color constant for black
 BLACK = (0,0,0)
