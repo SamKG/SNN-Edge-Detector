@@ -2,13 +2,14 @@ import pygame
 import os
 import subprocess
 import math
-import numpy as np
 import random
 import timemodule
-from neurongraphics import NeuronG
 from neuron import *
+from neurongraphics import NeuronG
+from neurontopixel import *
 import mnist_loader
 from dataplotter import DynamicPlot
+import numpy as np
 
 # Color constant for black
 BLACK = (0,0,0)
@@ -22,7 +23,7 @@ class Label:
 		self.font = pygame.font.SysFont("Segoe UI", 65)
 		self.labels = {0:"Photoreceptors", 1:"Off-Center-On-Surround",
 					2:"On-Center-Off-Surround", 3:"Ganglion", 4:"Ganglion Vertical", 5:"Ganglion Horizontal", 6:"Ganglion Diag LR", 7:"Ganglion Diag RL",
-					8:"Sinusoidal"}
+					8:"Sinusoidal", 9:"Pixel Output"}
 		self.anim_dur = 0
 		self.anim_curr = 0
 		self.currlabel = self.font.render(self.labels[init_idx], True, WHITE)
@@ -197,8 +198,8 @@ for i in range(0,neuronrows):
 		## Initialize neurons (one for every orientation)
 		vert = NeuronG(pos = pos1 + (pos2 - pos1)/4,scale = scale,custom_color = custom_color)
 		horz = NeuronG(pos = pos1 + (pos2 - pos1)/2,scale = scale,custom_color = custom_color)
-		diag_lr = NeuronG(pos = pos1 + (pos1 - pos2)/8,scale = scale,custom_color = custom_color)
-		diag_rl = NeuronG(pos = pos1 + (pos1 - pos2)/16,scale = scale,custom_color = custom_color)
+		diag_lr = NeuronG(pos = pos1 - (pos2 - pos1)/16,scale = scale,custom_color = custom_color)
+		diag_rl = NeuronG(pos = pos1 - (pos2 - pos1)/8,scale = scale,custom_color = custom_color)
 
 		## Add synapses
 		# 1) vertical line detector
@@ -221,11 +222,11 @@ for i in range(0,neuronrows):
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if tmp_i == i:
 					# we lie on horizontal line
-					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=1*pop) #excite with on
-					horz.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-1*pop) #inhibit off
+					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=0.5*pop) #excite with on
+					horz.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-0.5*pop) #inhibit off
 				else:
-					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=-1*pop) #inhibit when on
-					horz.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=1*pop) #excite when off
+					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=-0.2*pop) #inhibit when on
+					horz.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-0.2*pop) #excite when off
 		
 		# 3) Diagonal from left to right
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
@@ -234,11 +235,11 @@ for i in range(0,neuronrows):
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if abs(top_i - tmp_i) == abs(left_j - tmp_j):
 					# we lie on l-r diagonal (if distance to topleft corner is same in both x and y)
-					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=1*pop) #excite with on
-					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-1*pop) #inhibit off
+					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop) #excite with on
+					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.5*pop) #inhibit off
 				else:
-					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=-1*pop) #inhibit when on
-					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=1*pop) #excite when off
+					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #inhibit when on
+					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #excite when off
 
 		# 4) Diagonal from right to left
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
@@ -247,11 +248,11 @@ for i in range(0,neuronrows):
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if abs(bottom_i - tmp_i) == abs(left_j - tmp_j):
 					# we lie on l-r diagonal (if distance to topleft corner is same in both x and y)
-					diag_rl.add_syn(oncoffs[tmp_i][tmp_j],tau=1,w_init=10) #excite with on
-					diag_rl.add_syn(offcons[tmp_i][tmp_j],tau=1,w_init=-10) #inhibit off
+					diag_rl.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop) #excite with on
+					diag_rl.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.5*pop) #inhibit off
 				else:
-					diag_rl.add_syn(oncoffs[tmp_i][tmp_j],tau=1,w_init=-10) #inhibit when on
-					diag_rl.add_syn(offcons[tmp_i][tmp_j],tau=1,w_init=10) #excite when off
+					diag_rl.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #inhibit when on
+					diag_rl.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #excite when off
 
 		row.append(vert)
 		row.append(horz)
@@ -293,7 +294,11 @@ for i in range(0,neuronrows):
 				if d == 6 or d == 4 or d == 8:
 					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=4,w_init=1*pop)
 				else: 
-					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=4,w_init=-0.5*pop) 
+					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=4,w_init=-0.5*pop)
+					
+# Mapping the modified output layer to pixels
+pixelgrid = PixelGrid(output_layer)
+
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
 		for neuron in nrow:
@@ -324,10 +329,7 @@ labelanimlen = 300
 mylabel.update_label(draw_type)
 mylabel.anim_start(labelanimlen)
 
-nr = NeuronReader(neurongrid[14][9], fix_length = 100)
-dp = DynamicPlot([10,10], 400, 200, nr, 'spikes')
-
-num_layers = 9
+num_layers = 10
 
 while not done:
 	pressed = False
@@ -393,37 +395,15 @@ while not done:
 		if draw_type == 8:
 			draw_grid_synapses(output_layer)
 			draw_grid_neurons(output_layer)
-
-	#dp.draw(screen)
+		
+		if draw_type == 9:
+			pixelgrid.update()
+			pixelgrid.draw(screen)
 	
 	if DRAW_NEURONS:
-		if draw_type == 0:
-			mylabel.draw(screen, mylabelpos)
+		mylabel.draw(screen, mylabelpos)
 		
-		if draw_type == 1:
-			mylabel.draw(screen, mylabelpos)
 		
-		if draw_type == 2:
-			mylabel.draw(screen, mylabelpos)
-		
-		if draw_type == 3:
-			mylabel.draw(screen, mylabelpos)
-		
-		if draw_type == 4:
-			mylabel.draw(screen, mylabelpos)
-		
-		if draw_type == 5:
-			mylabel.draw(screen, mylabelpos)
-		
-		if draw_type == 6:
-			mylabel.draw(screen, mylabelpos)
-		
-		if draw_type == 7:
-			mylabel.draw(screen, mylabelpos)
-	
-		if draw_type == 8:
-			mylabel.draw(screen,mylabelpos)
-	
 	this_time = 0
 	while this_time < newtimestep:
 		this_time += dt
@@ -437,12 +417,7 @@ while not done:
 		update_grid_neurons(offcons, I_inj = 0.5)
 		update_grid_neurons(line_detectors)
 		update_grid_neurons(output_layer)
-		nr.read_neuron(nclock)
 		nclock.tick()
-	
-#	line_detectors_d[14][14].color = (255,255,255)
-#	for synapse in line_detectors_d[14][14].syns:
-#		synapse.n_pre.color = (255,255,255)
 		
 	fc += 1
 	
