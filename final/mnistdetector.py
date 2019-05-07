@@ -21,7 +21,7 @@ class Label:
 	def __init__(self, init_idx=0):
 		self.font = pygame.font.SysFont("Segoe UI", 65)
 		self.labels = {0:"Photoreceptors", 1:"Off-Center-On-Surround",
-					2:"On-Center-Off-Surround", 3:"Ganglion", 4:"Ganglion Vertical", 5:"Ganglion Horizontal", 6:"Ganglion Diag LR", 7:"Ganglion Diag RL"}
+					2:"On-Center-Off-Surround", 3:"Ganglion", 4:"Ganglion Vertical", 5:"Ganglion Horizontal", 6:"Ganglion Diag LR", 7:"Ganglion Diag RL",8:"Sinusoidal"}
 		self.anim_dur = 0
 		self.anim_curr = 0
 		self.currlabel = self.font.render(self.labels[init_idx], True, WHITE)
@@ -265,7 +265,31 @@ for i in range(0,neuronrows):
 	line_detectors_drl.append(diags_rl)
 
 # Mapping back to the photoreceptive layer
+output_layer = []
+for i in range(0,neuronrows):
+	row = []
+	for j in range(0,neuroncols):
+		outp = NeuronG(neurongrid[i][j].pos+(5,5), scale = scale, custom_color = custom_color)
+		row.append(outp)
+		outp.add_syn(neurongrid[i][j],tau=4,w_init=1) # compose input layer
+	output_layer.append(row)
 
+for i in range(0,neuronrows):
+	row = []
+	for j in range(0,neuroncols):
+		hneuron = line_detectors_h[i][j]
+		top_i = i - BLOCK_SIZE//2
+		bottom_i = i + BLOCK_SIZE//2
+		left_j = j - BLOCK_SIZE//2
+		right_j = j + BLOCK_SIZE//2
+		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
+			tmp_i = top_i + (d//BLOCK_SIZE)
+			tmp_j = left_j + (d%BLOCK_SIZE)
+			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
+				if d == 6 or d == 4 or d == 8:
+					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=4,w_init=1)
+				else: 
+					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=4,w_init=-1) 
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
 		for neuron in nrow:
@@ -299,7 +323,7 @@ mylabel.anim_start(labelanimlen)
 nr = NeuronReader(neurongrid[14][9], fix_length = 100)
 dp = DynamicPlot([10,10], 400, 200, nr, 'spikes')
 
-num_layers = 8
+num_layers = 9
 
 while not done:
 	pressed = False
@@ -370,6 +394,11 @@ while not done:
 			draw_grid_neurons(line_detectors_drl)
 			mylabel.draw(screen, mylabelpos)
 	
+		if draw_type == 8:
+			draw_grid_synapses(output_layer)
+			draw_grid_neurons(output_layer)
+			mylabel.draw(screen,mylabelpos)
+
 	dp.draw(screen)
 	
 	this_time = 0
@@ -384,6 +413,7 @@ while not done:
 		update_grid_neurons(oncoffs, I_inj = 1)
 		update_grid_neurons(offcons, I_inj = 1)
 		update_grid_neurons(line_detectors)
+		update_grid_neurons(output_layer)
 		nr.read_neuron(nclock)
 		nclock.tick()
 	
