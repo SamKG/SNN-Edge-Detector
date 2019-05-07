@@ -48,6 +48,8 @@ class DynamicPlot(Frame):
 				return self.object.spikes
 	def draw(self, screen):
 		pad = 20
+		resolution_x = self.fix_length // 5;
+		resolution_y = 10;
 		pygame.draw.rect(screen, (255,255,255), [self.pos[0], self.pos[1], self.scale_x, self.scale_y])
 		ratio_x = self.scale_x/screen.get_width();
 		ratio_y = self.scale_y/screen.get_height();
@@ -87,26 +89,29 @@ class DynamicPlot(Frame):
 			x_ax_plot = [normalize(x, x_ax_extents)*(self.scale_x - 2*pad*ratio_x) for x in x_ax]
 			y_ax_plot = [normalize(y, y_ax_extents)*(self.scale_y - 2*pad*ratio_y) for y in y_ax]
 			
-			dtick_x = (self.scale_x - 2*pad*ratio_x)/num_xs
-			dtick_y = (self.scale_y - 2*pad*ratio_y)/num_ys
+			dtick_x = (self.scale_x - 2*pad*ratio_x)/min(num_xs, resolution_x)
+			dtick_y = (self.scale_y - 2*pad*ratio_y)/resolution_y
 			ticklen = 5
-			for i in range(num_xs):
-				pos_tick_x = nparray([dtick_x*i + pad*ratio_x, x_axis_y])
+										
+			for i in range(resolution_y):
 				pos_tick_y = nparray([y_axis_x, dtick_y*i + pad*ratio_y])
-				tick_x_offset = nparray([0, ticklen*ratio_y])
 				tick_y_offset = nparray([ticklen*ratio_x, 0])
-				tick_x_extents = [pos_tick_x - tick_x_offset, pos_tick_x + tick_x_offset]
 				tick_y_extents = [pos_tick_y - tick_y_offset, pos_tick_y + tick_y_offset]
-				tick_x_extents = [[int(e[0]),int(e[1])] for e in tick_x_extents]
 				tick_y_extents = [[int(e[0]),int(e[1])] for e in tick_y_extents]
-				pygame.draw.aaline(screen, (0,0,0),  tick_x_extents[0], tick_x_extents[1])
 				pygame.draw.aaline(screen, (0,0,0),  tick_y_extents[0], tick_y_extents[1])
 				
+			for i in range(num_xs):
+				if(num_xs < resolution_x or i // resolution_x == 0):
+					pos_tick_x = nparray([dtick_x*i + pad*ratio_x, x_axis_y])
+					tick_x_offset = nparray([0, ticklen*ratio_y])
+					tick_x_extents = [pos_tick_x - tick_x_offset, pos_tick_x + tick_x_offset]
+					tick_x_extents = [[int(e[0]),int(e[1])] for e in tick_x_extents]
+					pygame.draw.aaline(screen, (0,0,0),  tick_x_extents[0], tick_x_extents[1])
+				
 				if self.var_interest == 'spikes':
-					pygame.draw.aaline(screen, (0,0,0), (x_ax_plot[i] + self.pos[0], x_axis_y),
+					pygame.draw.aaline(screen, (255,0,0), (x_ax_plot[i] + self.pos[0], x_axis_y),
 										(x_ax_plot[i] + self.pos[0], y_ax_plot[i] + self.pos[1]))
 				elif i < num_xs-1:
-					pygame.draw.aaline(screen, (0,0,0), (x_ax_plot[i] + self.pos[0], y_ax_plot[i] + self.pos[1]),
+					pygame.draw.aaline(screen, (255,0,0), (x_ax_plot[i] + self.pos[0], y_ax_plot[i] + self.pos[1]),
 										(x_ax_plot[i+1] + self.pos[0], y_ax_plot[i+1] + self.pos[1]))
-
 	
