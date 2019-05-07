@@ -21,7 +21,8 @@ class Label:
 	def __init__(self, init_idx=0):
 		self.font = pygame.font.SysFont("Segoe UI", 65)
 		self.labels = {0:"Photoreceptors", 1:"Off-Center-On-Surround",
-					2:"On-Center-Off-Surround", 3:"Ganglion", 4:"Ganglion Vertical", 5:"Ganglion Horizontal", 6:"Ganglion Diag LR", 7:"Ganglion Diag RL",8:"Sinusoidal"}
+					2:"On-Center-Off-Surround", 3:"Ganglion", 4:"Ganglion Vertical", 5:"Ganglion Horizontal", 6:"Ganglion Diag LR", 7:"Ganglion Diag RL",
+					8:"Sinusoidal"}
 		self.anim_dur = 0
 		self.anim_curr = 0
 		self.currlabel = self.font.render(self.labels[init_idx], True, WHITE)
@@ -357,49 +358,68 @@ while not done:
 		if draw_type == 0:
 			draw_grid_neurons(neurongrid)
 			draw_grid_synapses(neurongrid)
-			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 1:
 			draw_grid_neurons(offcons)
 			draw_grid_synapses(offcons)
-			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 2:
 			draw_grid_neurons(oncoffs)
 			draw_grid_synapses(oncoffs)
-			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 3:
 			draw_grid_synapses(line_detectors)
 			draw_grid_neurons(line_detectors)
-			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 4:
 			draw_grid_synapses(line_detectors_v)
 			draw_grid_neurons(line_detectors_v)
-			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 5:
 			draw_grid_synapses(line_detectors_h)
 			draw_grid_neurons(line_detectors_h)
-			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 6:
 			draw_grid_synapses(line_detectors_dlr)
 			draw_grid_neurons(line_detectors_dlr)
-			mylabel.draw(screen, mylabelpos)
 		
 		if draw_type == 7:
 			draw_grid_synapses(line_detectors_drl)
 			draw_grid_neurons(line_detectors_drl)
-			mylabel.draw(screen, mylabelpos)
 	
 		if draw_type == 8:
 			draw_grid_synapses(output_layer)
 			draw_grid_neurons(output_layer)
-			mylabel.draw(screen,mylabelpos)
 
-	dp.draw(screen)
+	#dp.draw(screen)
+	
+	if DRAW_NEURONS:
+		if draw_type == 0:
+			mylabel.draw(screen, mylabelpos)
+		
+		if draw_type == 1:
+			mylabel.draw(screen, mylabelpos)
+		
+		if draw_type == 2:
+			mylabel.draw(screen, mylabelpos)
+		
+		if draw_type == 3:
+			mylabel.draw(screen, mylabelpos)
+		
+		if draw_type == 4:
+			mylabel.draw(screen, mylabelpos)
+		
+		if draw_type == 5:
+			mylabel.draw(screen, mylabelpos)
+		
+		if draw_type == 6:
+			mylabel.draw(screen, mylabelpos)
+		
+		if draw_type == 7:
+			mylabel.draw(screen, mylabelpos)
+	
+		if draw_type == 8:
+			mylabel.draw(screen,mylabelpos)
 	
 	this_time = 0
 	while this_time < newtimestep:

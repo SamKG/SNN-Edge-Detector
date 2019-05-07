@@ -65,22 +65,28 @@ class DynamicPlot(Frame):
 		pygame.draw.aaline(screen, (0, 0, 0), (y_axis_x, int(self.pos[1] + pad*ratio_y)),
 								(y_axis_x, int(self.pos[1] + self.scale_y - pad*ratio_y)))
 		
+		# The x and y axes
 		x_ax = self.x_axis()
 		y_ax = self.y_axis()
 		
-					
+		# The length of the x and y axes
 		num_xs = len(x_ax)
 		num_ys = len(y_ax)
 		
+		# If the axes are nonzero in size
 		if num_xs > 0 and num_ys > 0:
 		
+			# Function to normalize the data
 			def normalize(value, extents):
 				if extents[0] == extents[1]:
 					return 1
 				return (value - extents[0])/(extents[1]-extents[0])
-				
+			
+			# The bounds of the x axis
 			x_ax_extents = [min(x_ax),max(x_ax)]
 			
+			# We set the y axis for spikes so that its normalized between 0 and 1
+			# Otherwise, just keep the extents bounded to the axes
 			if self.var_interest != 'spikes':
 				y_ax_extents = [min(y_ax),max(y_ax)]
 			else:
@@ -110,8 +116,8 @@ class DynamicPlot(Frame):
 				
 				if self.var_interest == 'spikes':
 					pygame.draw.aaline(screen, (255,0,0), (x_ax_plot[i] + self.pos[0], x_axis_y),
-										(x_ax_plot[i] + self.pos[0], y_ax_plot[i] + self.pos[1]))
+										(x_ax_plot[i] + self.pos[0], y_ax_plot[i]/2 + self.pos[1]))
 				elif i < num_xs-1:
-					pygame.draw.aaline(screen, (255,0,0), (x_ax_plot[i] + self.pos[0], y_ax_plot[i] + self.pos[1]),
-										(x_ax_plot[i+1] + self.pos[0], y_ax_plot[i+1] + self.pos[1]))
+					pygame.draw.aaline(screen, (255,0,0), (x_ax_plot[i] + self.pos[0], y_ax_plot[i]/2 + self.pos[1]),
+										(x_ax_plot[i+1] + self.pos[0], y_ax_plot[i+1]/2 + self.pos[1]))
 	
