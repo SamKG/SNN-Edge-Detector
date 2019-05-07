@@ -279,10 +279,12 @@ for i in range(0,neuronrows):
 		outp.add_syn(neurongrid[i][j],tau=4,w_init=1) # compose input layer
 	output_layer.append(row)
 
+# Making sinusoids
 for i in range(0,neuronrows):
 	row = []
 	for j in range(0,neuroncols):
 		hneuron = line_detectors_h[i][j]
+		vneuron = line_detectors_v[i][j]
 		top_i = i - BLOCK_SIZE//2
 		bottom_i = i + BLOCK_SIZE//2
 		left_j = j - BLOCK_SIZE//2
@@ -291,10 +293,13 @@ for i in range(0,neuronrows):
 			tmp_i = top_i + (d//BLOCK_SIZE)
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
+				# Horizontal
 				if d == 6 or d == 4 or d == 8:
 					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=4,w_init=1*pop)
 				else: 
 					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=4,w_init=-0.5*pop)
+				
+
 					
 # Mapping the modified output layer to pixels
 pixelgrid = PixelGrid(output_layer)
