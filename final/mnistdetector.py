@@ -117,7 +117,7 @@ scale = 20/(nsize/float(spacing))*scalefactor
 for i in range(0, neuronrows):
 	row = []
 	for j in range(0, neuroncols):
-		row.append(NeuronG(((j+1)*spacing,(i+1)*spacing), scale = scale, isinput = True))
+		row.append(NeuronG(((j+1)*spacing,(i+1)*spacing), scale = scale, is_input = True))
 	neurongrid.append(row)
 
 custom_color = lambda val : (val, 255-val, 0)
@@ -138,7 +138,7 @@ for i in range(0, neuronrows):
 		offconsrow.append(newoffcons)
 		# On center
 		newoncoffs.add_syn(neurongrid[i][j],
-								w_init = 1*pop, tau = 1, sign=1)
+								w_init = 1*pop, tau = 2, sign=1)
 		# Off center
 		newoffcons.add_syn(neurongrid[i][j],
 							w_init = 1*pop, tau = 1, sign=-1)
@@ -151,7 +151,7 @@ for i in range(0, neuronrows):
 			if within_bounds(curr_i, 0, neuronrows-1) and within_bounds(curr_j, 0, neuroncols-1):
 				# Off surround
 				newoncoffs.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.1*pop, sign=-1)
+									w_init = 0.02*pop, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
 									w_init = 0.02*pop, sign=1)				
@@ -163,7 +163,7 @@ for i in range(0, neuronrows):
 									w_init = 0.1*pop, sign=-1)
 				# On surround
 				newoffcons.add_syn(neurongrid[curr_i][curr_j],
-									w_init = 0.02*pop, sign=1)
+									w_init = 0.2*pop, sign=1)
 				rotation_1 *= 1j
 				rotation_2 *= 1j
 			
@@ -208,11 +208,11 @@ for i in range(0,neuronrows):
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if tmp_j == j:
 					# we lie on vertical line
-					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=1*pop) #excite with on
-					vert.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-1*pop) #inhibit off
+					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop) #excite with on
+					vert.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.5*pop) #inhibit off
 				else:
-					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=-1*pop) #inhibit when on
-					vert.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=1*pop) #excite when off
+					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #inhibit when on
+					vert.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #excite when off
 		
 		# 2) Horizontal line detector
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
