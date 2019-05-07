@@ -115,9 +115,9 @@ class DynamicPlot(Frame):
 					pygame.draw.aaline(screen, (0,0,0),  tick_x_extents[0], tick_x_extents[1])
 				
 				if self.var_interest == 'spikes':
-					pygame.draw.aaline(screen, (255,0,0), (x_ax_plot[i] + self.pos[0], x_axis_y),
+					pygame.draw.aaline(screen, (255,0,0), (x_ax_plot[i] + self.pos[0] + pad*ratio_x, x_axis_y),
 										(x_ax_plot[i] + self.pos[0], y_ax_plot[i]/2 + self.pos[1]))
 				elif i < num_xs-1:
-					pygame.draw.aaline(screen, (255,0,0), (x_ax_plot[i] + self.pos[0], y_ax_plot[i]/2 + self.pos[1]),
+					pygame.draw.aaline(screen, (255,0,0), (x_ax_plot[i] + self.pos[0] + pad*ratio_y, y_ax_plot[i]/2 + self.pos[1]),
 										(x_ax_plot[i+1] + self.pos[0], y_ax_plot[i+1]/2 + self.pos[1]))
 	

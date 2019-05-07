@@ -2,11 +2,11 @@ import numpy as np
 from collections import deque as Queue
 import math
 
-t_window = 10
+t_window = 1.5
 t_step = 5
 
 class Synapse:
-	def __init__(self, n_pre, n_post, tau = 1, w_init = 0.5, type = 'hebbian', **kwargs):
+	def __init__(self, n_pre, n_post, tau = 1, w_init = 0.5, type = None, **kwargs):
 		self.n_pre = n_pre
 		self.n_post = n_post
 		self.w = w_init
@@ -52,7 +52,7 @@ class Synapse:
 		return self.sign * self.w * self.I
 
 class Neuron:
-	def __init__(self, v_r = 0, R_m = 1, tau = 1, threshold = 0.2, type = "hebbian", **kwargs):
+	def __init__(self, v_r = 0, R_m = 1, tau = 1, threshold = 0.2, type = None, **kwargs):
 		self.v = v_r
 		self.v_r = v_r
 		self.R_m = R_m
@@ -102,17 +102,17 @@ class Neuron:
 					if(len(self.spikes) > t_window/dt):
 						self.spikes.popleft()
 				self.spikestoadd = []
-			# Need a fudge factor to make the spike rates reasonable
-			self.spike_rate = float(sum(self.spikes))/(t_window/(dt*25))
+
+			self.spike_rate = sum(self.spikes)/(t_window/dt)
 		else:
 			self.spikes.append(val)
 			if(len(self.spikes) > t_window/dt):
 						self.spikes.popleft()
 	
+	# Returns the firing rate of spikes per second
 	def get_firing_rate(self):
-		print(self.spikes)
 		if len(self.spikes) > 0:
-			return int(sum(self.spikes)/len(self.spikes))
+			return float(sum(self.spikes))/len(self.spikes)
 		else:
 			return 0
 	
@@ -167,7 +167,7 @@ class SynapseReader:
 		self.ws = []
 			
 class NeuronReader:
-	def __init__(self, neuron, readsyns = False, fix_length = -1):
+	def __init__(self, neuron, readsyns = False, fix_length = -1, var_interest = None):
 		self.neuron = neuron
 		self.readsyns = readsyns
 		if self.readsyns:
