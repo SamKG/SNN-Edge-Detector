@@ -6,6 +6,7 @@ class NeuronG(Neuron):
 		super().__init__(v_r, R_m, tau, threshold, **kwargs)
 		self.pos = pos
 		self.scale = scale
+		self.unit_scale = 20
 		val = int(self.v / self.threshold)
 		self.custom_color = kwargs.get('custom_color', None)
 		self.color_by_rate = kwargs.get('color_by_rate', True)
@@ -28,7 +29,7 @@ class NeuronG(Neuron):
 				else:
 					self.color = self.custom_color(val)
 		else:
-			val = int(self.get_firing_rate()*20*255)
+			val = int(self.firing_rate*20*255)
 			if val > 255:
 				val = 255
 			if(val < 0):
@@ -55,5 +56,5 @@ class NeuronG(Neuron):
 	
 	def draw_neuron(self, screen):
 		pygame.draw.circle(screen, self.color, (int(self.pos[0]), int(self.pos[1])), 
-							int(20*self.scale))
+							int(self.unit_scale*self.scale))
 		
