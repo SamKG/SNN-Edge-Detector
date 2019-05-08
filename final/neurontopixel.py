@@ -13,16 +13,13 @@ class Pixel:
 			
 	def update(self, *args):
 		colorval = 0
-		if self.threshold == None:
-			if self.neuron_to_pixel:
+		if(self.neuron_to_pixel):
+			if self.threshold == None:
 				colorval = 255-self.neuron.get_val()
 			else:
-				colorval = args[0]
-		else:
-			if self.neuron_to_pixel:
 				colorval = 255-255*(self.neuron.get_val() >= self.threshold)
-			else:
-				colorval = args[0]
+		else:
+			colorval = 255 - args[0]*255
 		self.color = (colorval, colorval, colorval)
 	
 	def draw(self, screen):
@@ -44,8 +41,8 @@ class PixelGrid:
 					self.pixels[i][j] = Pixel(pixpos, pixscale, threshold, neuron_to_pixel = True, neuron = neuron)
 				else:
 					width = self.screen_width
-					pixpos = np.array([i*width//len(self.pixels), j*width//len(self.pixels)])
-					pixscale = width/len(self.pixels)
+					pixpos = np.array([i*width//len(self.pixels), j*width//len(self.pixels[0])])
+					pixscale = width/len(self.pixels) - 5
 					self.pixels[i][j] = Pixel(pixpos, pixscale, threshold)
 	
 	def update(self, *args):
@@ -55,9 +52,9 @@ class PixelGrid:
 					pixel.update()
 		else:
 			grid = args[0]
-			for i in range(len(grid)):
-				for j in range(len(grid[0])):
-					pixel.update(grid[i][j])
+			for j in range(len(self.pixels[0])):
+				for i in range(len(self.pixels)):
+					self.pixels[i][j].update(grid[j][i])
 				
 		
 	def draw(self, screen):
