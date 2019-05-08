@@ -301,10 +301,14 @@ for i in range(0,neuronrows):
 			tmp_i = top_i + (d//BLOCK_SIZE)
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
-				if d == 6 or d == 4 or d == 8:
-					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=8*pop)
+				if j%3 == 1 and (d == 3 or d == 1 or d == 5):
+					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=1*pop)
+				elif j%3 == 2 and (d == 0 or d == 4 or d == 8):
+					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=1*pop)
+				elif j%3 == 0 and (d == 3 or d == 7 or d == 5):
+					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=1*pop)
 				else: 
-					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=-0.8*pop)
+					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=-0.1*pop)
 
 # Vertical
 for i in range(0,neuronrows):
@@ -319,10 +323,14 @@ for i in range(0,neuronrows):
 			tmp_i = top_i + (d//BLOCK_SIZE)
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
-				if d == 1 or d == 5 or d == 7:
-					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=0.8*pop)
+				if i%3 == 1 and (d == 1 or d == 3 or d == 7):
+					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=0.9*pop)
+				elif i%3 == 2 and (d == 0 or d == 4 or d == 8):
+					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=0.9*pop)
+				elif i%3 == 3 and (d == 1 or d == 3 or d == 5):
+					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=0.9*pop)
 				else: 
-					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=-0.5*pop)	
+					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=-0.1*pop)					
 
 # LR-Diagonal
 for i in range(0,neuronrows):
@@ -337,10 +345,12 @@ for i in range(0,neuronrows):
 			tmp_i = top_i + (d//BLOCK_SIZE)
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
-				if d == 0 or d==1 or d == 4 or d == 5 or d == 8:
-					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=.5*pop)
+				if i == j and i%2 == 1 and (d == 0 or d == 4 or d == 6 or d == 7 or d == 8):
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=1*pop)
+				elif i == j and i%2 == 0 and (d == 3 or d == 4 or d == 7):
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=1*pop)
 				else: 
-					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.5*pop)	
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.1*pop)	
 
 # RL-Diagonal
 for i in range(0,neuronrows):
@@ -355,10 +365,12 @@ for i in range(0,neuronrows):
 			tmp_i = top_i + (d//BLOCK_SIZE)
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
-				if d == 1 or d==2 or d == 3 or d == 4 or d == 6:
-					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=0.5*pop)
+				if j == (nneurons - 1 - i) and i % 2 == 0 and (d == 0 or d == 1 or d == 2 or d == 3 or d == 6):
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=1*pop)
+				elif j == (nneurons - 1 - i) and i % 2 == 0 and (d == 2 or d == 4 or d == 5):
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=1*pop)
 				else: 
-					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.5*pop)
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.1*pop)
 
 # Mapping the modified output layer to pixels
 pixelgrid = PixelGrid(output_layer, threshold = None, neuron_to_pixel = True)
