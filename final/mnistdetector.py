@@ -22,11 +22,9 @@ def within_bounds(x, x_l, x_r):
 	return x >= x_l and x <= x_r
 
 class Label:
-	def __init__(self, init_idx=0):
+	def __init__(self, labels, init_idx=0):
 		self.font = pygame.font.SysFont("Segoe UI", 65)
-		self.labels = {0:"Photoreceptors", 1:"Off-Center-On-Surround",
-					2:"On-Center-Off-Surround", 3:"Ganglion", 4:"Ganglion Vertical", 5:"Ganglion Horizontal", 6:"Ganglion Diag LR", 7:"Ganglion Diag RL",
-					8:"Sinusoidal", 9:"Pixel Output"}
+		self.labels = labels
 		self.anim_dur = 0
 		self.anim_curr = 0
 		self.currlabel = self.font.render(self.labels[init_idx], True, WHITE)
@@ -394,13 +392,15 @@ saved_frame = 0
 fc = 0
 framerate = 20
 
-mylabel = Label(draw_type)
+labeldict = {0:"Pixel Input", 1:"Photoreceptors", 2:"Off-Center-On-Surround", 3:"On-Center-Off-Surround", 4:"Ganglion", 5:"Ganglion Vertical", 6:"Ganglion Horizontal", 7:"Ganglion Diag LR", 8:"Ganglion Diag RL", 9:"Sinusoidal", 10:"Pixel Output"}
+
+mylabel = Label(labeldict, draw_type)
 mylabelpos = [size[0]/2-mylabel.currlabel.get_size()[0]/2,50]
 labelanimlen = 300
 mylabel.update_label(draw_type)
 mylabel.anim_start(labelanimlen)
 
-num_layers = 10
+num_layers = 11
 
 while not done:
 	pressed = False
@@ -430,44 +430,48 @@ while not done:
 	
 	screen.fill(BLACK)
 	
-	if DRAW_NEURONS:	
+	if DRAW_NEURONS:
 		if draw_type == 0:
+			inputgrid.update(currimg)
+			inputgrid.draw(screen)
+			
+		if draw_type == 1:
 			draw_grid_neurons(neurongrid)
 			draw_grid_synapses(neurongrid)
 		
-		if draw_type == 1:
+		if draw_type == 2:
 			draw_grid_synapses(offcons)
 			draw_grid_neurons(offcons)
 		
-		if draw_type == 2:
+		if draw_type == 3:
 			draw_grid_synapses(oncoffs)
 			draw_grid_neurons(oncoffs)
 		
-		if draw_type == 3:
+		if draw_type == 4:
 			draw_grid_synapses(line_detectors)
 			draw_grid_neurons(line_detectors)
 		
-		if draw_type == 4:
+		if draw_type == 5:
 			draw_grid_synapses(line_detectors_v)
 			draw_grid_neurons(line_detectors_v)
 		
-		if draw_type == 5:
+		if draw_type == 6:
 			draw_grid_synapses(line_detectors_h)
 			draw_grid_neurons(line_detectors_h)
 		
-		if draw_type == 6:
+		if draw_type == 7:
 			draw_grid_synapses(line_detectors_dlr)
 			draw_grid_neurons(line_detectors_dlr)
 		
-		if draw_type == 7:
+		if draw_type == 8:
 			draw_grid_synapses(line_detectors_drl)
 			draw_grid_neurons(line_detectors_drl)
 	
-		if draw_type == 8:
+		if draw_type == 9:
 			draw_grid_synapses(output_layer)
 			draw_grid_neurons(output_layer)
 		
-		if draw_type == 9:
+		if draw_type == 10:
 			pixelgrid.update()
 			pixelgrid.draw(screen)
 	
