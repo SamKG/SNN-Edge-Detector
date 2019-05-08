@@ -80,12 +80,15 @@ except FileExistsError:
 		vfnums = [int(os.path.splitext(vf)[0]) for vf in videofiles]
 		curr_recording_idx = max(vfnums)+1
 
-# Constant for whether to draw
+# Constant for whether to draw neurons
 DRAW_NEURONS = True
+# Constant for whether to draw labels
+DRAW_LABELS = False
+
 
 # Defines the screen
-nsize = 856
-size = (nsize,nsize)
+ssize = 856
+size = (ssize,ssize)
 screen = pygame.display.set_mode(size)
 
 # Creates the game clock
@@ -112,7 +115,10 @@ neuroncols = nneurons
 neuronrows = nneurons
 spacing = 29.5
 scalefactor = 0.8
-scale = 20/(nsize/float(spacing))*scalefactor
+scale = 20/(ssize/float(spacing))*scalefactor
+
+# Input grid
+inputgrid = PixelGrid(currimg, threshold = None, screen_width = ssize)
 
 # photoreceptive layer
 for i in range(0, neuronrows):
@@ -222,11 +228,11 @@ for i in range(0,neuronrows):
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if tmp_i == i:
 					# we lie on horizontal line
-					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=0.5*pop) #excite with on
-					horz.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-0.5*pop) #inhibit off
+					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop) #excite with on
+					horz.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.5*pop) #inhibit off
 				else:
-					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=4,w_init=-0.2*pop) #inhibit when on
-					horz.add_syn(offcons[tmp_i][tmp_j],tau=4,w_init=-0.2*pop) #excite when off
+					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #inhibit when on
+					horz.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #excite when off
 		
 		# 3) Diagonal from left to right
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
@@ -276,7 +282,7 @@ for i in range(0,neuronrows):
 	for j in range(0,neuroncols):
 		outp = NeuronG(neurongrid[i][j].pos+(5,5), scale = scale, custom_color = custom_color)
 		row.append(outp)
-		outp.add_syn(neurongrid[i][j],tau=4,w_init=1) # compose input layer
+		outp.add_syn(neurongrid[i][j],tau=1,w_init=1) # compose input layer
 	output_layer.append(row)
 
 # Making sinusoids
@@ -295,9 +301,9 @@ for i in range(0,neuronrows):
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if d == 6 or d == 4 or d == 8:
-					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=4,w_init=1*pop)
+					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=8*pop)
 				else: 
-					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=4,w_init=-0.5*pop)
+					output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=-0.8*pop)
 
 # Vertical
 for i in range(0,neuronrows):
@@ -313,9 +319,9 @@ for i in range(0,neuronrows):
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if d == 1 or d == 5 or d == 7:
-					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=4,w_init=1*pop)
+					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=0.8*pop)
 				else: 
-					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=4,w_init=-0.5*pop)	
+					output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=-0.5*pop)	
 
 # LR-Diagonal
 for i in range(0,neuronrows):
@@ -331,9 +337,9 @@ for i in range(0,neuronrows):
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if d == 0 or d==1 or d == 4 or d == 5 or d == 8:
-					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=4,w_init=1*pop)
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=.5*pop)
 				else: 
-					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=4,w_init=-0.5*pop)	
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.5*pop)	
 
 # RL-Diagonal
 for i in range(0,neuronrows):
@@ -349,12 +355,12 @@ for i in range(0,neuronrows):
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 				if d == 1 or d==2 or d == 3 or d == 4 or d == 6:
-					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=4,w_init=1*pop)
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=0.5*pop)
 				else: 
-					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=4,w_init=-0.5*pop)
+					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.5*pop)
 
 # Mapping the modified output layer to pixels
-pixelgrid = PixelGrid(output_layer)
+pixelgrid = PixelGrid(output_layer, threshold = None, neuron_to_pixel = True)
 
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
@@ -416,7 +422,7 @@ while not done:
 	
 	screen.fill(BLACK)
 	
-	if DRAW_NEURONS:
+	if DRAW_NEURONS:	
 		if draw_type == 0:
 			draw_grid_neurons(neurongrid)
 			draw_grid_synapses(neurongrid)
@@ -457,9 +463,8 @@ while not done:
 			pixelgrid.update()
 			pixelgrid.draw(screen)
 	
-	if DRAW_NEURONS:
+	if DRAW_LABELS:
 		mylabel.draw(screen, mylabelpos)
-		
 		
 	this_time = 0
 	while this_time < newtimestep:
