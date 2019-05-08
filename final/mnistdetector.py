@@ -373,7 +373,7 @@ for i in range(0,neuronrows):
 					output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.1*pop)
 
 # Mapping the modified output layer to pixels
-pixelgrid = PixelGrid(output_layer, threshold = None, neuron_to_pixel = True)
+pixelgrid = PixelGrid(output_layer, threshold = 0.6, neuron_to_pixel = True)
 
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:
