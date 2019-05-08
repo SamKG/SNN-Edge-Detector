@@ -12,7 +12,8 @@ from dataplotter import DynamicPlot
 import numpy as np
 import threading
 from cython.parallel import prange, parallel
-
+import multiprocessing
+from concurrent.futures import *
 # Color constant for black
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -367,11 +368,16 @@ def draw_grid_synapses(neurongrid):
 			if neuron != None:
 				neuron.draw_synapses(screen)
 
+def update_row_neurons(neuronrow,I_inj = 0):
+	for neuron in neuronrow:
+		if neuron != None:
+			neuron.update(nclock.dt, I_inj = I_inj)
+
+
 def update_grid_neurons(neurongrid, I_inj = 0):
-	for nrow in neurongrid:
-		for neuron in nrow:
-			if neuron != None:
-				neuron.update(nclock.dt, I_inj = I_inj)
+	executor = ThreadPoolExecutor(max_workers=5)
+	res = [ executor.submit(update_row_neurons, row, I_inj) for row in neurongrid]
+	res = [future.result() for future in res]
 
 draw_type = 0
 record = False
