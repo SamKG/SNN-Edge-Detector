@@ -42,7 +42,7 @@ class PixelGrid:
 				else:
 					width = self.screen_width
 					pixpos = np.array([i*width//len(self.pixels), j*width//len(self.pixels[0])])
-					pixscale = width/len(self.pixels) - 5
+					pixscale = width/len(self.pixels) - 2
 					self.pixels[i][j] = Pixel(pixpos, pixscale, threshold)
 	
 	def update(self, *args):
