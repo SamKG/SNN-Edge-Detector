@@ -139,13 +139,13 @@ class NeuronReader:
 		self.vs = []
 		self.spikes = []
 		if self.readsyns:
-			self.synreaders = [SynapseReader(syn) for syn in self.neuron.syns]
+			self.synreaders = [SynapseReader(syn, self.fix_length) for syn in self.neuron.syns]
 			
 	def update_synapses(self):
 		if self.readsyns:
 			for syn in self.neuron.syns:
 				if syn not in self.syns:
-					self.synreaders.append(SynapseReader(syn))
+					self.synreaders.append(SynapseReader(syn, self.fix_length))
 					
 	def refresh(self):
 		self.vs = []
