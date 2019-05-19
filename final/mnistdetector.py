@@ -286,9 +286,8 @@ for i in range(0,neuronrows):
 		outp.add_syn(neurongrid[i][j],tau=1,w_init=1) # compose input layer
 	output_layer.append(row)
 
-# Making sinusoids
-<<<<<<< HEAD
-sinusoidchoice = {"horizontal":True, "vertical":False, "diagonal_lr":False, "diagonal_rl":False}
+	
+sinusoidchoice = {"horizontal":True, "vertical":True, "diagonal_lr":False, "diagonal_rl":False}
 
 # Horizontal
 if sinusoidchoice["horizontal"]:
