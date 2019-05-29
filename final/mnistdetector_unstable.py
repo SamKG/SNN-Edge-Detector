@@ -181,6 +181,12 @@ for i in range(0, neuronrows):
 # Constant for line detecting ganglion cells
 BLOCK_SIZE = 3	
 
+# Weighting constants
+oncoffs_exc = 0.5
+oncoffs_inh = 0.2
+offcons_exc = 0.1
+offcons_inh = 0.1
+
 # Line detecting ganglion cells
 # each neuron is responsible for detecting its own 3x3 block of on-center off-surround cells surrounding the neuron
 line_detectors = []
@@ -214,52 +220,96 @@ for i in range(0,neuronrows):
 			tmp_i = top_i + (d//BLOCK_SIZE)
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
+				# if we lie on vertical line...
 				if tmp_j == j:
-					# we lie on vertical line
-					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop) #excite with on
-					vert.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.5*pop) #inhibit off
+					#excite with on-center
+					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.75*pop)
+					#excite with off-center one column to the left or right
+					if tmp_j > 0:
+						vert.add_syn(offcons[tmp_i][tmp_j-1],tau=2,w_init=0.1*pop)
+					if tmp_j < neuroncols - 1:
+						vert.add_syn(offcons[tmp_i][tmp_j+1],tau=2,w_init=0.1*pop)
+				# otherwise, we don't lie on the vertical line
 				else:
-					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #inhibit when on
-					vert.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #excite when off
+					#inhibit with on-center
+					vert.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.3*pop)
+					#inhibit with off-center one column to the left or right
+					if tmp_j > 0:
+						vert.add_syn(offcons[tmp_i][tmp_j-1],tau=2,w_init=-0.1*pop)
+					if tmp_j < neuroncols - 1:
+						vert.add_syn(offcons[tmp_i][tmp_j+1],tau=2,w_init=-0.1*pop)
 		
 		# 2) Horizontal line detector
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
 			tmp_i = top_i + (d//BLOCK_SIZE)
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
+				# if we lie on horizontal line...
 				if tmp_i == i:
-					# we lie on horizontal line
-					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop) #excite with on
-					horz.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.5*pop) #inhibit off
+					#excite with on-center
+					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.75*pop)
+					#excite with off-center one row above or below
+					if tmp_i > 0:
+						horz.add_syn(offcons[tmp_i-1][tmp_j],tau=2,w_init=0.1*pop)
+					if tmp_i < neuronrows - 1:
+						horz.add_syn(offcons[tmp_i+1][tmp_j],tau=2,w_init=0.1*pop)
+				# otherwise, we don't lie on the horizontal line
 				else:
-					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #inhibit when on
-					horz.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #excite when off
+					#inhibit with on-center
+					horz.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.3*pop)
+					#inhibit with off-center one row above or below
+					if tmp_i > 0:
+						horz.add_syn(offcons[tmp_i-1][tmp_j],tau=2,w_init=-0.1*pop)
+					if tmp_i < neuronrows - 1:
+						horz.add_syn(offcons[tmp_i+1][tmp_j],tau=2,w_init=-0.1*pop)
 		
 		# 3) Diagonal from left to right
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
 			tmp_i = top_i + (d//BLOCK_SIZE)
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
+				# if we lie on l-r diagonal (if distance to topleft corner is same in both x and y)... 
 				if abs(top_i - tmp_i) == abs(left_j - tmp_j):
-					# we lie on l-r diagonal (if distance to topleft corner is same in both x and y)
-					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop) #excite with on
-					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.5*pop) #inhibit off
+					#excite with on-center
+					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop)
+					#excite off-center one diagonal above and below
+					if tmp_i > 0 and tmp_j > 0:
+						diag_lr.add_syn(offcons[tmp_i-1][tmp_j-1],tau=2,w_init=0.1*pop)
+					if tmp_i < neuronrows - 1 and tmp_j < neuroncols - 1:
+						diag_lr.add_syn(offcons[tmp_i+1][tmp_j+1],tau=2,w_init=0.1*pop)
+				# otherwise, we don't lie on the l-r diagonal
 				else:
-					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #inhibit when on
-					diag_lr.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #excite when off
+					#inhibit with on-center
+					diag_lr.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop)
+					#inhibit off-center one diagonal above and below
+					if tmp_i > 0 and tmp_j > 0:
+						diag_lr.add_syn(offcons[tmp_i-1][tmp_j-1],tau=2,w_init=-0.1*pop)
+					if tmp_i < neuronrows - 1 and tmp_j < neuroncols - 1:
+						diag_lr.add_syn(offcons[tmp_i+1][tmp_j+1],tau=2,w_init=-0.1*pop)
 
 		# 4) Diagonal from right to left
 		for d in range(0,BLOCK_SIZE*BLOCK_SIZE):
 			tmp_i = top_i + (d//BLOCK_SIZE)
 			tmp_j = left_j + (d%BLOCK_SIZE)
 			if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
+				# if we lie on l-r diagonal (if distance to topleft corner is same in both x and y)...
 				if abs(bottom_i - tmp_i) == abs(left_j - tmp_j):
-					# we lie on l-r diagonal (if distance to topleft corner is same in both x and y)
-					diag_rl.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop) #excite with on
-					diag_rl.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.5*pop) #inhibit off
+					#excite with on-center
+					diag_rl.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=0.5*pop)
+					#excite off-center one diagonal above and below
+					if tmp_i > 0 and tmp_j > 0:
+						diag_rl.add_syn(offcons[tmp_i-1][tmp_j-1],tau=2,w_init=0.1*pop)
+					if tmp_i < neuronrows - 1 and tmp_j < neuroncols - 1:
+						diag_rl.add_syn(offcons[tmp_i+1][tmp_j+1],tau=2,w_init=0.1*pop)
+				# otherwise, we don't lie on the l-r diagonal
 				else:
-					diag_rl.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #inhibit when on
-					diag_rl.add_syn(offcons[tmp_i][tmp_j],tau=2,w_init=-0.2*pop) #excite when off
+					#inhibit with on-center
+					diag_rl.add_syn(oncoffs[tmp_i][tmp_j],tau=2,w_init=-0.2*pop)
+					#inhibit off-center one diagonal above and below
+					if tmp_i < neuronrows-1 and tmp_j > 0:
+						diag_rl.add_syn(offcons[tmp_i+1][tmp_j-1],tau=2,w_init=-0.1*pop)
+					if tmp_i > 0 and tmp_j < neuroncols - 1:
+						diag_rl.add_syn(offcons[tmp_i-1][tmp_j+1],tau=2,w_init=-0.1*pop)
 
 		row.append(vert)
 		row.append(horz)
@@ -287,7 +337,7 @@ for i in range(0,neuronrows):
 	output_layer.append(row)
 
 	
-sinusoidchoice = {"horizontal":True, "vertical":True, "diagonal_lr":False, "diagonal_rl":False}
+sinusoidchoice = {"horizontal":False, "vertical":True, "diagonal_lr":False, "diagonal_rl":False}
 
 # Horizontal
 if sinusoidchoice["horizontal"]:
@@ -304,20 +354,20 @@ if sinusoidchoice["horizontal"]:
 				tmp_j = left_j + (d%BLOCK_SIZE)
 				if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 					if j%3 == 1 and (d == 3 or d == 1 or d == 5):
-						output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=1*pop)
+						output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=2,w_init=1*pop)
 					elif j%3 == 2 and (d == 0 or d == 4 or d == 8):
-						output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=1*pop)
+						output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=2,w_init=1*pop)
 					elif j%3 == 0 and (d == 3 or d == 7 or d == 5):
-						output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=1*pop)
+						output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=2,w_init=1*pop)
 					else: 
-						output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=1,w_init=-0.1*pop)
+						output_layer[tmp_i][tmp_j].add_syn(hneuron,tau=2,w_init=-0.05*pop)
 
 # Vertical
 if sinusoidchoice["vertical"]:
 	for i in range(0,neuronrows):
 		row = []
 		for j in range(0,neuroncols):
-			vneuron = line_detectors_h[i][j]
+			vneuron = line_detectors_v[i][j]
 			top_i = i - BLOCK_SIZE//2
 			bottom_i = i + BLOCK_SIZE//2
 			left_j = j - BLOCK_SIZE//2
@@ -327,20 +377,20 @@ if sinusoidchoice["vertical"]:
 				tmp_j = left_j + (d%BLOCK_SIZE)
 				if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
 					if i%3 == 1 and (d == 1 or d == 3 or d == 7):
-						output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=0.9*pop)
+						output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=1*pop)
 					elif i%3 == 2 and (d == 0 or d == 4 or d == 8):
-						output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=0.9*pop)
-					elif i%3 == 3 and (d == 1 or d == 3 or d == 5):
-						output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=0.9*pop)
+						output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=1*pop)
+					elif i%3 == 0 and (d == 1 or d == 3 or d == 5):
+						output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=1*pop)
 					else: 
-						output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=-0.1*pop)					
+						output_layer[tmp_i][tmp_j].add_syn(vneuron,tau=1,w_init=-0.05*pop)					
 
 # LR-Diagonal
 if sinusoidchoice["diagonal_lr"]:
 	for i in range(0,neuronrows):
 		row = []
 		for j in range(0,neuroncols):
-			dneuron = line_detectors_h[i][j]
+			dneuron = line_detectors_dlr[i][j]
 			top_i = i - BLOCK_SIZE//2
 			bottom_i = i + BLOCK_SIZE//2
 			left_j = j - BLOCK_SIZE//2
@@ -349,19 +399,34 @@ if sinusoidchoice["diagonal_lr"]:
 				tmp_i = top_i + (d//BLOCK_SIZE)
 				tmp_j = left_j + (d%BLOCK_SIZE)
 				if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
-					if i == j and i%2 == 1 and (d == 0 or d == 4 or d == 6 or d == 7 or d == 8):
+					if i%2 == 1 and (d == 0 or d == 4 or d == 6 or d == 7 or d == 8):
 						output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=1*pop)
-					elif i == j and i%2 == 0 and (d == 3 or d == 4 or d == 7):
+						'''
+						# For debugging
+						if i == 10 and j == 10 or i == 11 and j == 11:
+							output_layer[tmp_i][tmp_j].debug_color = (0, 255, 255)
+						'''
+					elif i%2 == 0 and (d == 3 or d == 4 or d == 7):
 						output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=1*pop)
+						'''
+						# For debugging
+						if i == 10 and j == 10 or i == 11 and j == 11:
+							output_layer[tmp_i][tmp_j].debug_color = (255, 215, 10)
+						'''
 					else: 
-						output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.1*pop)	
+						output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.1*pop)
+						'''
+						# For debugging
+						if i == 10 and j == 10 or i == 11 and j == 11:
+							output_layer[tmp_i][tmp_j].debug_color = (255, 20, 147)
+						'''
 
 # RL-Diagonal
 if sinusoidchoice["diagonal_rl"]:
 	for i in range(0,neuronrows):
 		row = []
 		for j in range(0,neuroncols):
-			dneuron = line_detectors_h[i][j]
+			dneuron = line_detectors_drl[i][j]
 			top_i = i - BLOCK_SIZE//2
 			bottom_i = i + BLOCK_SIZE//2
 			left_j = j - BLOCK_SIZE//2
@@ -370,15 +435,15 @@ if sinusoidchoice["diagonal_rl"]:
 				tmp_i = top_i + (d//BLOCK_SIZE)
 				tmp_j = left_j + (d%BLOCK_SIZE)
 				if (tmp_i >= 0 and tmp_i < nneurons) and (tmp_j >= 0 and tmp_j < nneurons):
-					if j == (nneurons - 1 - i) and i % 2 == 0 and (d == 0 or d == 1 or d == 2 or d == 3 or d == 6):
+					if i % 2 == 0 and (d == 0 or d == 1 or d == 2 or d == 3 or d == 6):
 						output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=1*pop)
-					elif j == (nneurons - 1 - i) and i % 2 == 0 and (d == 2 or d == 4 or d == 5):
+					elif i % 2 == 0 and (d == 2 or d == 4 or d == 5):
 						output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=1*pop)
 					else: 
 						output_layer[tmp_i][tmp_j].add_syn(dneuron,tau=1,w_init=-0.1*pop)
 
 # Mapping the modified output layer to pixels
-pixelgrid = PixelGrid(output_layer, threshold = 0.75, neuron_to_pixel = True)
+pixelgrid = PixelGrid(output_layer, threshold = 0.5, neuron_to_pixel = True)
 
 def draw_grid_neurons(neurongrid):
 	for nrow in neurongrid:

@@ -17,7 +17,7 @@ class Pixel:
 			if self.threshold == None:
 				colorval = 255-self.neuron.get_val()
 			else:
-				colorval = 255-255*(self.neuron.get_val() >= self.threshold)
+				colorval = 255-255*(self.neuron.get_val() >= self.threshold*255)
 		else:
 			colorval = 255 - args[0]*255
 		self.color = (colorval, colorval, colorval)

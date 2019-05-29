@@ -11,6 +11,7 @@ class NeuronG(Neuron):
 		val = int(self.v / self.threshold)
 		self.custom_color = kwargs.get('custom_color', None)
 		self.color_by_rate = kwargs.get('color_by_rate', True)
+		self.debug_color = kwargs.get('debug_color', None)
 		if self.custom_color is None:
 			self.color = (val,0,255-val)
 		else:
@@ -29,6 +30,11 @@ class NeuronG(Neuron):
 	
 	def update(self, dt, I_inj = 0, learn = False):
 		vout = super().update(dt, I_inj, learn)
+		
+		if self.debug_color:
+			self.color = self.debug_color
+			return vout
+			
 		if not self.color_by_rate:
 			val = int(vout / self.threshold * 255)
 			if(val < 0):
